@@ -1,0 +1,130 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import '../styles/global.css';
+import { DEFAULT_LOCALE, LOCALE_PATH, LOCALES, SITE_ORIGIN, STRINGS, type Locale } from '../data/site';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = STRINGS[locale];
+
+/**
+ * 預載拉丁字母的 woff2 分片。
+ * 檔名由下載腳本按順序編號，所以這裡在建置時直接讀 CSS 找出
+ * 含有基本拉丁範圍的那幾片 —— 字體重新下載後也不會失效。
+ * （中文分片有一百多片，由瀏覽器依 unicode-range 自取，不預載。）
+ */
+function latinPreloads(): string[] {
+  const cssPath = path.resolve('src/styles/fonts.css');
+  if (!fs.existsSync(cssPath)) return [];
+  const css = fs.readFileSync(cssPath, 'utf8');
+  const blocks = css.split('@font-face').slice(1);
+  const found: string[] = [];
+  for (const block of blocks) {
+    const family = block.match(/font-family:\s*'([^']+)'/)?.[1];
+    const src = block.match(/\/fonts\/([\w.-]+\.woff2)/)?.[1];
+    const range = block.match(/unicode-range:\s*([^;]+);/)?.[1] ?? '';
+    if (!family || !src) continue;
+    if (family === 'Noto Sans TC') continue;
+    // 基本拉丁：U+0000-00FF 一定落在這一片
+    if (/U\+0000-00FF/i.test(range)) found.push(src);
+  }
+  return found;
+}
+
+const preloads = latinPreloads();
+const canonical = new URL(LOCALE_PATH[locale], SITE_ORIGIN).href;
+
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: '李嘉峻',
+  alternateName: 'BEDO',
+  url: SITE_ORIGIN,
+  email: 'mailto:ach3r204@gmail.com',
+  affiliation: {
+    '@type': 'CollegeOrUniversity',
+    name: 'National Taiwan University of Science and Technology',
+  },
+  knowsAbout: ['Automatic speech recognition', 'Natural language processing'],
+  sameAs: [
+    'https://github.com/acheeeee',
+    'https://www.linkedin.com/in/bedo-lee-858726404',
+    'https://www.instagram.com/be_do_in_gatao/',
+  ],
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.siteTitle}</title>
+    <meta name="description" content={t.metaDescription} />
+    <link rel="canonical" href={canonical} />
+
+    {
+      LOCALES.map((code) => (
+        <link
+          rel="alternate"
+          hreflang={STRINGS[code].htmlLang}
+          href={new URL(LOCALE_PATH[code], SITE_ORIGIN).href}
+        />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={new URL(LOCALE_PATH[DEFAULT_LOCALE], SITE_ORIGIN).href} />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={t.siteTitle} />
+    <meta property="og:description" content={t.metaDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === 'en' ? 'en' : 'zh_Hant_TW'} />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+
+    {
+      preloads.map((file) => (
+        <link rel="preload" href={`/fonts/${file}`} as="font" type="font/woff2" crossorigin="anonymous" />
+      ))
+    }
+
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
+
+    {
+      /* 首訪語言偵測：只在中文首頁執行，所以 /en/ 的直接連結永遠被尊重，
+         也不可能產生轉向迴圈。使用者按過切換就以他的選擇為準。 */
+      locale === DEFAULT_LOCALE && (
+        <script is:inline>
+          (function () {
+            try {
+              var stored = localStorage.getItem('bedo.lang');
+              if (stored === 'zh-Hant') return;
+              if (stored === 'en') {
+                location.replace('/en/');
+                return;
+              }
+              var tags = navigator.languages && navigator.languages.length
+                ? navigator.languages
+                : [navigator.language || ''];
+              var wantsChinese = Array.prototype.some.call(tags, function (tag) {
+                return /^zh/i.test(tag);
+              });
+              if (!wantsChinese) location.replace('/en/');
+            } catch (e) {
+              /* 偵測失敗就留在中文版 */
+            }
+          })();
+        </script>
+      )
+    }
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

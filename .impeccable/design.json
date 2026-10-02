@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-02T23:40:00+08:00",
+  "title": "Design System: 墨線紙帶 / Ink-Trace Chart",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "紙 Paper", "canonical": "#cfc8b8", "tonalRamp": ["#241f1a", "#3a342c", "#564e42", "#746a5a", "#948a76", "#b3ac9c", "#cfc8b8", "#e2ddd2"] },
+      "paper-high": { "role": "neutral", "displayName": "亮紙 Paper High", "canonical": "#ded8ca", "tonalRamp": ["#2a251f", "#423b32", "#5e5648", "#7d7363", "#9d9381", "#bcb3a1", "#ded8ca", "#eeeae2"] },
+      "paper-edge": { "role": "neutral", "displayName": "紙邊 Paper Edge", "canonical": "#bbb3a1", "tonalRamp": ["#211d18", "#363028", "#514a3e", "#6d6555", "#8d846f", "#aaa08c", "#bbb3a1", "#d4cdbf"] },
+      "paper-deep": { "role": "neutral", "displayName": "紙凹 Paper Deep", "canonical": "#aaa28e", "tonalRamp": ["#1f1b16", "#332e25", "#4c453a", "#685f50", "#867c69", "#a2977f", "#aaa28e", "#c8c1b2"] },
+      "grid": { "role": "neutral", "displayName": "網格 Grid（橙紅印刷方格）", "canonical": "#cf8a6e", "tonalRamp": ["#331c13", "#4e2a1d", "#6d3b29", "#8e4d36", "#af6349", "#cf8a6e", "#dda68f", "#eac8ba"] },
+      "grid-strong": { "role": "neutral", "displayName": "強網格 Grid Strong（橙紅主格線）", "canonical": "#b4573c", "tonalRamp": ["#2e130d", "#471c13", "#64281b", "#833425", "#9d442f", "#b4573c", "#cd7a63", "#e2a996"] },
+      "rule": { "role": "neutral", "displayName": "細線 Rule（中性結構線）", "canonical": "#a8a192", "tonalRamp": ["#1f1b16", "#332e26", "#4d463b", "#696050", "#877c69", "#9f9480", "#a8a192", "#c7c1b4"] },
+      "rule-strong": { "role": "neutral", "displayName": "強細線 Rule Strong（中性結構線）", "canonical": "#8e8676", "tonalRamp": ["#1b1813", "#2d2920", "#443e32", "#5d5545", "#7a7059", "#8e8676", "#a89f8c", "#c6bfb0"] },
+      "pen-1": { "role": "secondary", "displayName": "鈷藍 Pen 1（主通道）", "canonical": "#16357e", "tonalRamp": ["#081028", "#0c1b43", "#102560", "#16357e", "#2149a3", "#3a63c0", "#6f8dd4", "#aec1e8"] },
+      "pen-2": { "role": "secondary", "displayName": "朱紅 Pen 2（通道二）", "canonical": "#ab2f22", "tonalRamp": ["#2e0d09", "#481410", "#671e17", "#86261d", "#ab2f22", "#c84f41", "#dc7f74", "#ecb3ab"] },
+      "pen-3": { "role": "secondary", "displayName": "松綠 Pen 3（通道三）", "canonical": "#0c5a52", "tonalRamp": ["#031815", "#06251f", "#09392f", "#0c4b40", "#0c5a52", "#167d72", "#3fa89c", "#8ccfc6"] },
+      "trace-1": { "role": "neutral", "displayName": "墨線 1 Trace 1（濃度回落）", "canonical": "#b2ac9d", "tonalRamp": ["#211d18", "#363027", "#514a3d", "#6e6555", "#8d8470", "#aaa08b", "#b2ac9d", "#cfc9bc"] },
+      "trace-2": { "role": "neutral", "displayName": "墨線 2 Trace 2（濃度回落）", "canonical": "#6b6253", "tonalRamp": ["#17140f", "#262118", "#3b352a", "#524a3b", "#6b6253", "#88806d", "#a79f8c", "#c6bfb0"] },
+      "trace-3": { "role": "neutral", "displayName": "墨線 3 Trace 3（濃度回落）", "canonical": "#2f2a23", "tonalRamp": ["#15120e", "#211d18", "#2f2a23", "#453e32", "#5e5646", "#7d735f", "#9d9380", "#bdb4a2"] },
+      "trace-4": { "role": "neutral", "displayName": "墨線 4 Trace 4（筆色回落預設）", "canonical": "#1a1713", "tonalRamp": ["#0e0c0a", "#1a1713", "#2a251e", "#3f382d", "#574f3f", "#746b57", "#948a73", "#b4ab96"] },
+      "ink": { "role": "neutral", "displayName": "墨 Ink", "canonical": "#1b2330", "tonalRamp": ["#090c11", "#11161e", "#1b2330", "#28333f", "#3b4a5c", "#58697f", "#8696a9", "#b9c3d1"] },
+      "ink-strong": { "role": "neutral", "displayName": "強墨 Ink Strong", "canonical": "#0e141d", "tonalRamp": ["#070a0e", "#0e141d", "#171f2b", "#24303f", "#374656", "#55687f", "#8695a8", "#b7c2d0"] },
+      "ink-soft": { "role": "neutral", "displayName": "柔墨 Ink Soft", "canonical": "#4a4336", "tonalRamp": ["#17140f", "#262118", "#383125", "#4a4336", "#665c48", "#897c62", "#a99d80", "#c9bfa6"] },
+      "grease": { "role": "primary", "displayName": "蠟筆紅 Grease Red", "canonical": "#d4452f", "tonalRamp": ["#3b120b", "#5a1c12", "#7e271a", "#a23323", "#c23c2a", "#d4452f", "#e37a69", "#f1b2a7"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "記錄表頭裡的姓名 h1，唯一的 display 級用途（.identity__name）。使用者指示下上限由 84px 降到 56px。" },
+      "headline": { "displayName": "Headline", "purpose": "區段標題 .section__title（--text-2xl）。" },
+      "title": { "displayName": "Title", "purpose": "工作紙帶標題 .band__title（--text-xl）。" },
+      "body": { "displayName": "Body", "purpose": "正文與導語，欄寬上限 68ch；使用者指示下基準升到約 17–19px。" },
+      "label": { "displayName": "Label／蝕刻", "purpose": "Martian Mono 蝕刻標籤與量測讀值，全大寫、tabular-nums。" }
+    },
+    "shadows": [
+      { "name": "shadow-photo", "value": "0 12px 26px -10px rgba(26, 23, 19, 0.5), 0 2px 5px -2px rgba(26, 23, 19, 0.36)", "purpose": "角貼照片浮在紙面上的抬起；帶 y 位移的柔影，不用零位移光暈。" },
+      { "name": "shadow-panel", "value": "0 1px 0 0 rgba(215, 210, 199, 0.5) inset, 0 6px 16px -12px rgba(26, 23, 19, 0.5)", "purpose": "繪圖區、聯絡面板、主要動作按鈕、黏性面板列的凹入感：頂部亮紙 inset 高光 + 底部極淡落影。" }
+    ],
+    "motion": [
+      { "name": "clock", "value": "1150ms", "purpose": "單一時鐘：所有入場動態共用的節拍（--clock）。" },
+      { "name": "ease-burn", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "全站過場與入場的唯一 easing（沿用舊名 --ease-burn）。" },
+      { "name": "pen-sweep", "value": "@keyframes：筆 .wave__pen 由 translateX(0) 掃到 translateX(--plot-width)，opacity 0.9 → 0，歷時 var(--clock)", "purpose": "入場：一支筆由左至右走過繪圖區一次。" },
+      { "name": "ink-settle", "value": "@keyframes：每欄墨線 opacity 0 → 1，歷時 calc(--clock*0.5)，animation-delay 依該欄 --col（0..0.86）遞增", "purpose": "入場：筆走過後墨線依序落下。" },
+      { "name": "scrub-playhead", "value": "指標 scrub 時 .wave__playhead / .band__mark（1px --grease ＋ 三角刻痕）跟隨，下方讀出時間／峰值振幅／IPA", "purpose": "簽名互動；鍵盤路徑（方向鍵／Home／End／Shift 大步）等價。" },
+      { "name": "grain", "value": "0.17", "purpose": "body::before 紙纖維 feTurbulence 的 opacity 強度；prefers-reduced-transparency 下停用。" }
+    ],
+    "breakpoints": [
+      { "name": "wide", "value": "60rem", "purpose": "此寬度以下照片與身分欄位重排成記錄表頭、波形跨滿寬，名字留在第一屏。" },
+      { "name": "narrow", "value": "46rem", "purpose": "此寬度以下波形繪圖區長高（aspect-ratio 1200/520）、振幅槽縮到 2.5rem、--plot-pad 降到 6px、收起 ±0.5 刻度只留 ±1 與零線、圖說取消左內縮、姓名降為 clamp(1.875rem, 8.6vw, 2.5rem)。" }
+    ],
+    "surfaceGrid": {
+      "gridFine": "color-mix(in oklab, var(--grid) 11%, transparent)",
+      "gridHeavy": "color-mix(in oklab, var(--grid-strong) 16%, transparent)",
+      "gridFineStep": "8px",
+      "gridHeavyStep": "40px",
+      "purpose": "整頁滿版印刷方格記錄紙：橙紅粗格 40px、細格 8px，隨頁面捲動；強度刻意調弱兩次，太強會讀成瑕疵而非紙。背景色掛 html 不掛 body。"
+    }
+  },
+  "components": [
+    {
+      "name": "Waveform (Ink Trace, Pen 1)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "主紙帶：多筆道記錄儀主通道的鈷藍墨線。每欄一條 1px non-scaling-stroke，鏡像於零線，橙紅虛線振幅格，上壓音段邊界與音標；刻度槽只放值，軸名在圖說。此為靜態示意（實際由 buildWaveform() 從音韻模型合成）。",
+      "html": "<figure class=\"ds-wave\"><div class=\"ds-wave__frame\"><div class=\"ds-wave__amp\"><span class=\"ds-mono\">+1</span><span class=\"ds-mono\">+0.5</span><span class=\"ds-mono ds-mono--axis\">0</span><span class=\"ds-mono\">\u22120.5</span><span class=\"ds-mono\">\u22121</span></div><div class=\"ds-wave__plot\" tabindex=\"0\"><svg class=\"ds-wave__svg\" viewBox=\"0 0 480 120\" preserveAspectRatio=\"none\" role=\"img\" aria-label=\"\u300c\u674e\u5609\u5cfb\u300d\u7684\u97f3\u6ce2\u5716\uff08\u6a6b\u8ef8\u6642\u9593\uff08\u79d2\uff09 / \u7e31\u8ef8\u6b63\u898f\u5316\u632f\u5e45\uff09\"><g stroke=\"#cf8a6e\" stroke-width=\"1\"><line x1=\"0\" y1=\"30\" x2=\"480\" y2=\"30\" stroke-dasharray=\"2 7\" vector-effect=\"non-scaling-stroke\"/><line x1=\"0\" y1=\"90\" x2=\"480\" y2=\"90\" stroke-dasharray=\"2 7\" vector-effect=\"non-scaling-stroke\"/></g><line x1=\"0\" y1=\"60\" x2=\"480\" y2=\"60\" stroke=\"#b4573c\" stroke-width=\"1\" vector-effect=\"non-scaling-stroke\"/><g stroke=\"#16357e\" stroke-width=\"1\"><line x1=\"12\" y1=\"52\" x2=\"12\" y2=\"68\" vector-effect=\"non-scaling-stroke\"/><line x1=\"24\" y1=\"30\" x2=\"24\" y2=\"90\" vector-effect=\"non-scaling-stroke\"/><line x1=\"36\" y1=\"14\" x2=\"36\" y2=\"106\" vector-effect=\"non-scaling-stroke\"/><line x1=\"48\" y1=\"40\" x2=\"48\" y2=\"80\" vector-effect=\"non-scaling-stroke\"/><line x1=\"60\" y1=\"58\" x2=\"60\" y2=\"62\" vector-effect=\"non-scaling-stroke\"/><line x1=\"150\" y1=\"8\" x2=\"150\" y2=\"112\" vector-effect=\"non-scaling-stroke\"/><line x1=\"162\" y1=\"26\" x2=\"162\" y2=\"94\" vector-effect=\"non-scaling-stroke\"/><line x1=\"300\" y1=\"20\" x2=\"300\" y2=\"100\" vector-effect=\"non-scaling-stroke\"/><line x1=\"312\" y1=\"44\" x2=\"312\" y2=\"76\" vector-effect=\"non-scaling-stroke\"/></g><g stroke=\"#1b2330\" stroke-width=\"1\" opacity=\"0.55\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"120\" vector-effect=\"non-scaling-stroke\"/><line x1=\"96\" y1=\"0\" x2=\"96\" y2=\"120\" vector-effect=\"non-scaling-stroke\"/><line x1=\"240\" y1=\"0\" x2=\"240\" y2=\"120\" vector-effect=\"non-scaling-stroke\"/></g></svg><span class=\"ds-wave__tier\"><span class=\"ds-ipa\" style=\"left:10%\">l</span><span class=\"ds-ipa\" style=\"left:35%\">i</span><span class=\"ds-ipa\" style=\"left:62%\">ja</span></span></div></div><figcaption class=\"ds-wave__cap\">\u300c\u674e\u5609\u5cfb\u300d\u4e09\u97f3\u7bc0\u7684\u5408\u6210\u6ce2\u5f62\uff0c\u975e\u5be6\u969b\u9304\u97f3\u5206\u6790\u3002\u6a6b\u8ef8\u6642\u9593\uff08\u79d2\uff09\uff0c\u7e31\u8ef8\u6b63\u898f\u5316\u632f\u5e45\u3002</figcaption></figure>",
+      "css": ".ds-wave { display: flex; flex-direction: column; gap: 0.75rem; } .ds-wave__frame { display: grid; grid-template-columns: 3.25rem 1fr; column-gap: 0.5rem; } .ds-wave__amp { position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; } .ds-mono { font-family: 'Martian Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 0.75rem; font-weight: 450; color: #4a4336; } .ds-mono--axis { font-weight: 700; color: #0e141d; } .ds-wave__plot { position: relative; aspect-ratio: 480 / 120; padding: 10px; background-color: color-mix(in oklab, #cfc8b8 72%, #ded8ca); border: 1px solid #b4573c; box-shadow: 0 1px 0 0 rgba(215,210,199,0.5) inset, 0 6px 16px -12px rgba(26,23,19,0.5); overflow: hidden; cursor: crosshair; } .ds-wave__plot:focus-visible { outline: 2px solid #0e141d; outline-offset: 2px; } .ds-wave__svg { width: 100%; height: 100%; } .ds-wave__tier { position: absolute; inset: 0; pointer-events: none; } .ds-ipa { position: absolute; bottom: 0.3rem; translate: -50% 0; font-family: 'Archivo', sans-serif; font-size: 0.875rem; font-weight: 500; color: #1b2330; } .ds-wave__cap { padding-left: calc(3.25rem + 0.5rem); padding-top: 0.5rem; border-top: 1px solid #a8a192; max-width: 54ch; font-size: 0.875rem; color: #4a4336; }"
+    },
+    {
+      "name": "Work Band (Pen Channel)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "一條工作等於一條墨線包絡紙帶，每條帶自己的通道筆色（pen 1/2/3），上下緣是走紙齒孔。顏色分通道不分狀態；狀態靠墨色濃度、振幅、收尾。此為靜態示意（實際由 buildWorkTrace() 以條目 id 為種子生成）。",
+      "html": "<article class=\"ds-band\" data-status=\"active\" style=\"--pen:#16357e\"><h3 class=\"ds-band__title\">COALA \u8ad6\u6587\u91cd\u73fe</h3><p class=\"ds-band__summary\">ASR contextual biasing\uff0c\u91cd\u73fe\u4e2d\u3002</p><div class=\"ds-band__trace\"><svg class=\"ds-band__svg\" viewBox=\"0 0 480 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\" style=\"opacity:0.92\"><line x1=\"0\" y1=\"60\" x2=\"480\" y2=\"60\" stroke=\"#b4573c\" stroke-width=\"1\" vector-effect=\"non-scaling-stroke\"/><g stroke=\"#16357e\" stroke-width=\"1\"><line x1=\"12\" y1=\"50\" x2=\"12\" y2=\"70\" vector-effect=\"non-scaling-stroke\"/><line x1=\"24\" y1=\"38\" x2=\"24\" y2=\"82\" vector-effect=\"non-scaling-stroke\"/><line x1=\"36\" y1=\"28\" x2=\"36\" y2=\"92\" vector-effect=\"non-scaling-stroke\"/><line x1=\"48\" y1=\"44\" x2=\"48\" y2=\"76\" vector-effect=\"non-scaling-stroke\"/><line x1=\"60\" y1=\"20\" x2=\"60\" y2=\"100\" vector-effect=\"non-scaling-stroke\"/><line x1=\"72\" y1=\"34\" x2=\"72\" y2=\"86\" vector-effect=\"non-scaling-stroke\"/></g></svg><span class=\"ds-band__mark\" aria-hidden=\"true\"></span></div><dl class=\"ds-band__fields\"><div><dt class=\"ds-engraved\">\u901a\u9053</dt><dd class=\"ds-band__value ds-band__value--channel\"><span class=\"ds-band__swatch\"></span>CH1</dd></div><div><dt class=\"ds-engraved\">\u72c0\u614b</dt><dd class=\"ds-band__value\">\u9032\u884c\u4e2d \u00b7 \u672a\u6536\u5c3e</dd></div></dl></article>",
+      "css": ".ds-band { display: grid; gap: 0.75rem; padding-block: 2rem; border-top: 1px solid #8e8676; } .ds-band__title { font-family: 'Archivo', sans-serif; font-size: clamp(1.4375rem, 1.25rem + 0.85vw, 1.9375rem); font-weight: 700; font-stretch: 104%; letter-spacing: -0.022em; color: #1b2330; } .ds-band__summary { max-width: 68ch; margin: 0; color: #4a4336; font-family: 'Archivo', sans-serif; } .ds-band__trace { position: relative; height: clamp(86px, 10vw, 126px); margin-top: 0.5rem; padding-block: 10px; background-color: color-mix(in oklab, #cfc8b8 72%, #ded8ca); border-top: 1px solid #cf8a6e; border-bottom: 1px solid #cf8a6e; overflow: hidden; cursor: crosshair; } .ds-band__trace::before, .ds-band__trace::after { content: ''; position: absolute; inset-inline: 0; height: 10px; pointer-events: none; background-image: radial-gradient(circle at 6px 5px, color-mix(in oklab, #aaa28e 86%, #6b6253) 0 2.7px, #ded8ca 2.9px 3.6px, transparent 3.7px); background-size: 30px 10px; background-repeat: repeat-x; } .ds-band__trace::before { top: 0; } .ds-band__trace::after { bottom: 0; } .ds-band__svg { position: absolute; inset: 10px 0; width: 100%; height: calc(100% - 20px); } .ds-band__svg line:not(:first-child) { stroke: var(--pen, #1a1713); } .ds-band__mark { position: absolute; inset-block: 0; left: 30%; width: 1px; background-color: #d4452f; opacity: 0.92; pointer-events: none; } .ds-band__fields { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; margin: 0; } .ds-band__fields div { display: flex; flex-direction: column; gap: 0.15rem; } .ds-engraved { font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4336; } .ds-band__value { margin: 0; font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.875rem; font-weight: 600; color: #0e141d; } .ds-band__value--channel { display: inline-flex; align-items: center; gap: 0.4rem; } .ds-band__swatch { display: inline-block; width: 1.1rem; height: 3px; background-color: var(--pen, #1a1713); }"
+    },
+    {
+      "name": "Jump Primary",
+      "kind": "button",
+      "refersTo": "jump-primary",
+      "description": "唯一的主要動作，長得像面板上的一個按鍵；箭頭以蠟筆紅描邊。",
+      "html": "<a class=\"ds-jump\" href=\"#active\"><svg class=\"ds-jump__arrow\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M8 1.5v12M3 9l5 4.5L13 9\"/></svg><span class=\"ds-jump__text\">\u5f80\u4e0b\u770b\u9032\u884c\u4e2d\u7684\u5de5\u4f5c</span><span class=\"ds-jump__count\">\u9032\u884c\u4e2d 2 \u689d</span></a>",
+      "css": ".ds-jump { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem 0.7rem 0.75rem; background-color: color-mix(in oklab, #ded8ca 78%, #cfc8b8); border: 1px solid #1b2330; box-shadow: 0 1px 0 0 rgba(215,210,199,0.5) inset, 0 6px 16px -12px rgba(26,23,19,0.5); text-decoration: none; color: #0e141d; transition: background-color 150ms cubic-bezier(0.16,1,0.3,1), box-shadow 150ms cubic-bezier(0.16,1,0.3,1); } .ds-jump:hover { background-color: #ded8ca; box-shadow: 0 8px 18px -12px rgba(26,23,19,0.6); } .ds-jump__arrow { width: 1rem; height: 1rem; flex: none; fill: none; stroke: #d4452f; stroke-width: 1.6; stroke-linecap: square; transition: transform 220ms cubic-bezier(0.16,1,0.3,1); } .ds-jump:hover .ds-jump__arrow { transform: translateY(2px); } .ds-jump__text { font-family: 'Archivo', sans-serif; font-size: 0.875rem; font-weight: 650; letter-spacing: -0.005em; } .ds-jump__count { padding-left: 0.75rem; border-left: 1px solid #8e8676; font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #4a4336; }"
+    },
+    {
+      "name": "Language Scale (Nav)",
+      "kind": "nav",
+      "refersTo": "lang-notch",
+      "description": "面板列右端的語言刻度；當前刻度底部一道蠟筆紅筆痕，而非填色塊。面板下緣另有橙紅印刷索引刻度。",
+      "html": "<nav class=\"ds-scale\" aria-label=\"language\"><ul><li><a class=\"ds-notch is-active\" href=\"/\" aria-current=\"true\">ZH</a></li><li><a class=\"ds-notch\" href=\"/en/\">EN</a></li></ul></nav>",
+      "css": ".ds-scale ul { display: flex; margin: 0; padding: 0; list-style: none; border: 1px solid #8e8676; background-color: #bbb3a1; } .ds-scale li + li { border-left: 1px solid #8e8676; } .ds-notch { position: relative; display: block; padding: 0.3rem 0.7rem 0.4rem; font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; font-stretch: 88%; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; color: #4a4336; } .ds-notch:hover { color: #0e141d; background-color: color-mix(in oklab, #ded8ca 70%, transparent); } .ds-notch.is-active { color: #0e141d; background-color: #ded8ca; } .ds-notch.is-active::after { content: ''; position: absolute; inset-inline: 0.45rem; bottom: 0.18rem; height: 2px; background-color: #d4452f; }"
+    },
+    {
+      "name": "Contact Plate",
+      "kind": "card",
+      "refersTo": "contact-plate",
+      "description": "蝕刻聯絡面板：固定槽位 grid，每格一個蝕刻標籤加一個連結值；直角、中性細框、面板凹槽陰影，四角有面板螺絲。",
+      "html": "<div class=\"ds-plate\"><p class=\"ds-plate__intro\">\u8981\u804a\u7814\u7a76\u3001\u5408\u4f5c\u6216\u55ae\u7d14\u60f3\u554f\u4e00\u53e5\uff0c\u5bc4\u4fe1\u6700\u5feb\u3002</p><ul class=\"ds-plate__slots\"><li class=\"ds-slot\"><span class=\"ds-engraved\">EMAIL</span><a class=\"ds-slot__value\" href=\"mailto:ach3r204@gmail.com\">ach3r204@gmail.com</a></li><li class=\"ds-slot\"><span class=\"ds-engraved\">GITHUB</span><a class=\"ds-slot__value\" href=\"https://github.com/acheeeee\">acheeeee</a></li></ul></div>",
+      "css": ".ds-plate { position: relative; display: grid; gap: 1.5rem; padding: 2rem 1.5rem 1.5rem; background-color: color-mix(in oklab, #ded8ca 72%, #cfc8b8); border: 1px solid #8e8676; box-shadow: 0 1px 0 0 rgba(215,210,199,0.5) inset, 0 6px 16px -12px rgba(26,23,19,0.5); color: #1b2330; } .ds-plate::before { content: ''; position: absolute; inset: 0.55rem; pointer-events: none; background-image: radial-gradient(circle at 0.22rem 0.22rem, #aaa28e 0 0.2rem, transparent 0.22rem), radial-gradient(circle at calc(100% - 0.22rem) 0.22rem, #aaa28e 0 0.2rem, transparent 0.22rem), radial-gradient(circle at 0.22rem calc(100% - 0.22rem), #aaa28e 0 0.2rem, transparent 0.22rem), radial-gradient(circle at calc(100% - 0.22rem) calc(100% - 0.22rem), #aaa28e 0 0.2rem, transparent 0.22rem); background-repeat: no-repeat; } .ds-plate__intro { max-width: 46ch; margin: 0; color: #4a4336; font-family: 'Archivo', sans-serif; } .ds-plate__slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem 1.5rem; margin: 0; padding: 0; list-style: none; } .ds-slot { display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.5rem; border-top: 1px solid #8e8676; } .ds-engraved { font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4336; } .ds-slot__value { font-family: 'Archivo', sans-serif; font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.005em; color: #1b2330; overflow-wrap: anywhere; text-decoration-color: color-mix(in oklab, #1b2330 42%, transparent); text-underline-offset: 0.22em; } .ds-slot__value:hover { text-decoration-color: #d4452f; }"
+    },
+    {
+      "name": "Pasted Photo (Corner-Mounted)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "角貼照片：四個切角三角把照片貼在略歪的紙板上，330px 顯示上限，不得插值放大。",
+      "html": "<figure class=\"ds-mount\"><div class=\"ds-mount__plate\"><div class=\"ds-mount__photo\"></div><span class=\"ds-corner ds-corner--tl\"></span><span class=\"ds-corner ds-corner--tr\"></span><span class=\"ds-corner ds-corner--bl\"></span><span class=\"ds-corner ds-corner--br\"></span></div><figcaption class=\"ds-engraved\">\u89d2\u8cbc\u7167\u7247</figcaption></figure>",
+      "css": ".ds-mount { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; max-width: 330px; } .ds-mount__plate { position: relative; rotate: -0.7deg; background-color: #ded8ca; box-shadow: 0 12px 26px -10px rgba(26,23,19,0.5), 0 2px 5px -2px rgba(26,23,19,0.36); } .ds-mount__photo { aspect-ratio: 778 / 1052; background: linear-gradient(160deg, #bbb3a1, #aaa28e); filter: saturate(0.82) contrast(1.04); } .ds-corner { position: absolute; width: 1.35rem; height: 1.35rem; background-color: color-mix(in oklab, #aaa28e 82%, #6b6253); opacity: 0.9; } .ds-corner--tl { top: 0; left: 0; clip-path: polygon(0 0, 100% 0, 0 100%); } .ds-corner--tr { top: 0; right: 0; clip-path: polygon(100% 0, 100% 100%, 0 0); } .ds-corner--bl { bottom: 0; left: 0; clip-path: polygon(0 0, 0 100%, 100% 100%); } .ds-corner--br { bottom: 0; right: 0; clip-path: polygon(100% 0, 100% 100%, 0 100%); } .ds-engraved { font-family: 'Martian Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4336; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "多筆道記錄儀的墨線 (The Multi-Pen Chart Recorder's Ink Lines)",
+    "overview": "這頁不是在介紹一個人，而是攤開他工作的輸出紙帶——而且整張頁面本身就是記錄紙。暖灰米黃的紙面上預印著一整片橙紅色的方格（心電圖紙那種），一台多筆道筆式記錄儀在上面運作：主通道的鈷藍觸針把名字的時域訊號畫成一條精準的墨線——每一欄一條 1px 的直線，鏡像於零線。線上壓著手寫的音段邊界與國際音標，下面是時間刻度尺與正規化振幅刻度。每一筆工作也是這張紙上的一條墨線包絡，各自用一支通道筆色（鈷藍、朱紅、松綠），躺在自己的時間軸上；未收尾、衝出右緣的那一條，就是現在正在做的事。這個世界經歷兩輪使用者指示的演化：先從感熱燒痕換成精準墨線，再從收斂改為多筆道彩色記錄儀——印刷方格變橙紅、每條記錄一支通道筆色、蠟筆紅提亮，並補上整張頁面的物理（印刷方格紙、SVG 亂流紙纖維、走紙齒孔、撕線孔、面板索引刻度、面板螺絲、通道色條）；四層套印、蝕刻標籤、狀態靠濃度、單一時鐘的骨架全部保留。密度與誠實是這個系統的性格：墨線一律 1px、non-scaling-stroke、不模糊不漸層；顏色分通道不分狀態；狀態靠墨色濃度、振幅與收尾；等寬字只承載量測。波形是由音韻模型程序合成的，不是真實錄音，所以圖說帶著誠實標籤。",
+    "keyCharacteristics": [
+      "整張頁面是一張印刷方格記錄紙：橙紅方格背景跑滿全頁，不只在圖裡。",
+      "兩套線系統永不混用：橙紅印刷方格（--grid）與中性結構細線（--rule）各司其職。",
+      "墨線是精準的線，不是模糊的場：每欄一條 1px non-scaling-stroke，鏡像於零線。",
+      "顏色編碼通道（--pen-1/2/3），不編碼狀態；狀態靠墨色濃度、振幅與收尾與否。",
+      "蠟筆紅 --grease 只以筆痕（線、箭頭、底線、刻痕）出現，永不做填色塊、永不承載文字。",
+      "四層套印：紙 → 網格（印刷方格）→ 墨線 → 標記；不准第五層。",
+      "單一時鐘驅動所有入場動態：一支筆由左至右走過，墨線依序落下。"
+    ],
+    "rules": [
+      { "name": "The Two-Line-Systems Rule（兩線分治律）", "body": "版面上有兩套永不混用的線。--grid / --grid-strong 是印刷圖表格線（橙紅）：只出現在圖表內（振幅格線、零線、外框）、紙帶上下緣、刻度短痕、以及作為整張頁面的方格背景。--rule / --rule-strong 是中性結構細線：面板邊、框、欄位分隔。把結構細線漆成橙紅，整頁就會讀成一張發票。審核測試：這條線是「紙上印好的圖表格子」還是「版面把兩塊東西分開」？印表格用 grid，分版面用 rule。", "section": "colors" },
+      { "name": "The Colour-Encodes-Channel Rule（色即通道律）", "body": "--pen-1（鈷藍）/ --pen-2（朱紅）/ --pen-3（松綠）是記錄通道，每條工作條目在 site.ts 攜帶 pen 欄位。顏色只分通道，不表達狀態。狀態一律是墨色濃度（--trace-opacity）＋振幅包絡（收不收）＋是否收尾（雙線 terminal）。已完成不是換灰色，而是把同一支筆色往紙面混退一階（color-mix(... var(--pen) 82%, var(--paper))）。沒有徽章、沒有 pill。", "section": "colors" },
+      { "name": "The Grease-As-Mark Rule（蠟筆只畫痕律）", "body": "--grease (#d4452f) 只以線、描邊、底線、刻痕、播放頭、選取混色出現。它永遠不是 background-color 的填色、不是色塊、不是按鈕底，也永遠不承載文字。它在紙上實測對比足以讓筆痕清楚可見（約 4.8:1），但正因為它永不排字，無須通過正文對比門檻——它是記號不是文本。審核測試：若把某處的 --grease 換成一塊填色或拿它排一行字它就壞了，那它用對了。", "section": "colors" },
+      { "name": "The Trace-Is-A-Line Rule（墨線成線律）", "body": "第三層是畫出來的精準線，不是暈開的場：每一欄一條 1px、vector-effect: non-scaling-stroke、無濾鏡、無漸層的直線，鏡像於零線。縮放時線不得變粗、不得模糊。新區塊若需要能量感，應長出一條墨線包絡紙帶（用某支 --pen），而不是加一個色點、也不是回到模糊的灰階密度場。", "section": "colors" },
+      { "name": "The No-Eyebrow Rule（禁眉標律）", "body": "標題上方不放小標、kicker 或 eyebrow。身分資訊的蝕刻標籤排在值的旁邊或下方，鎖在同一記錄表網格裡，從不浮在標題之上。", "section": "typography" },
+      { "name": "The Mono-For-Measurement Rule（等寬限量測律）", "body": "Martian Mono 只承載被量到的東西：時間碼、振幅讀值、刻度標籤、計數、通道號、wdth 蝕刻標籤、頁腳 repo 路徑、面板擁有者短標。它不當正文、不當裝飾性強調。數值一律 tabular-nums + 'tnum' 1 對位。", "section": "typography" },
+      { "name": "The Axis-Name-In-Caption Rule（軸名入圖說律）", "body": "圖表的刻度槽只畫刻度值（振幅 +1 / +0.5 / 0 / −0.5 / −1、時間秒數），不排軸名。振幅軸名與時間軸名都在圖說裡——因為軸名排在刻度槽裡會在某些寬度與語言下和端點刻度標籤相撞。軸名也併進 SVG 的 aria-label 給螢幕閱讀器，但視覺上不出現在槽裡。", "section": "typography" },
+      { "name": "The One-Font-Two-Scripts Rule（一字兩文律）", "body": "中英文共用同一條 --font-sans 堆疊，Archivo 打拉丁、Noto Sans TC 接中文。英文版顯示名固定為 BEDO；不得為中文名自行拼寫羅馬拼音。", "section": "typography" },
+      { "name": "The Paper-On-Paper Rule（紙疊紙律）", "body": "抬起只用於真的疊在紙面上的物件（照片、面板、按鈕、繪圖區），且一律用帶 y 位移的柔影，不用 0 0 光暈。表面在靜止時是平的；陰影是物理，不是強調。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 遵守四層套印順序（紙 → 網格 → 墨線 → 標記墨），任何新元素都歸入這四層之一；整頁方格、紙纖維、齒孔、撕線孔都屬於第一、二層。",
+      "Do 分清兩套線：橙紅 --grid / --grid-strong 只畫印刷圖表格與整頁方格；中性 --rule / --rule-strong 畫版面結構分隔。",
+      "Do 把波形畫成精準的線：每欄一條 1px、vector-effect: non-scaling-stroke、無濾鏡無漸層，鏡像於零線。",
+      "Do 用 --pen-1/2/3 編碼通道，每條工作條目帶 pen 欄位，相鄰條目輪不同號；色條 .band__swatch 與通道同色。",
+      "Do 用墨色濃度（--trace-opacity）、振幅與收尾與否表達狀態：進行中濃、振幅不收、衝出右緣；已完成筆色退一階、雙線收束。",
+      "Do 讓 --grease (#d4452f) 只以畫出的筆痕出現（線、描邊、底線、刻痕、播放頭、選取混色），永不填色、永不排字。",
+      "Do 讓整頁方格低語：--grid-fine = color-mix(... var(--grid) 11%, transparent)、--grid-heavy = color-mix(... var(--grid-strong) 16%, transparent)，細格 --grid-fine-step: 8px、粗格 --grid-heavy-step: 40px；強度已刻意調弱兩次。",
+      "Do 把背景色掛在 html 上（不要掛 body），否則滿版方格在 scroll/fixed 混用下會被裁到第一屏高度就斷掉。",
+      "Do 把紙纖維做成 body::before 上的內嵌 SVG feTurbulence data URI（mix-blend-mode: multiply、opacity: var(--grain) = 0.17），並在 prefers-reduced-transparency: reduce 下停用；它屬於第一層紙。",
+      "Do 讓圖表刻度槽只放刻度值（+1 / +0.5 / 0 / −0.5 / −1、秒數），把軸名放進圖說與 aria-label。",
+      "Do 讓繪圖區 inset（--plot-pad）與音標 tier、時間尺的 padding-inline: calc(var(--plot-pad) + var(--hairline)) 一致，刻度才對齊內層 row 而非 padding 外框。",
+      "Do 把等寬 Martian Mono 留給被量到的數（時間、振幅、刻度、計數、通道號），並開 tabular-nums + 'tnum' 1。",
+      "Do 所有入場動態共用單一時鐘 --clock: 1150ms + --ease-burn: cubic-bezier(0.16, 1, 0.3, 1)；授權的動態是筆由左至右走過、墨線依序落下（pen-sweep + ink-settle），加 scrub 時的 --grease 播放頭。",
+      "Do 保留瀏覽器表面的世界化：::selection 用 --grease 26% 混色、caret-color: --grease、scrollbar-color: --grid-strong --paper-edge（thumb hover 轉 --pen-2）、:focus-visible 用 2px --ink-strong + outline-offset: 3px、連結 text-underline-offset: 0.22em、hover 底線轉 --grease。",
+      "Do 自架 Archivo（wght 100–900 + wdth 62–125）、Martian Mono（wght 100–800 + wdth 75–112.5）、Noto Sans TC（wght 100–900），全部 font-display: swap、依 unicode-range 分片。",
+      "Do 把程序合成的波形圖說標註為示意（非實際錄音分析）。"
+    ],
+    "donts": [
+      "Don't 加入第五層或任何漂浮於四層套印之上的視覺平面。",
+      "Don't 把中性結構細線漆成橙紅（會讓頁面讀成發票），也不要把橙紅印刷格線拿去當版面分隔。",
+      "Don't 讓墨線模糊、加濾鏡、加漸層，或讓它隨縮放變粗（不得退回舊的感熱燒痕灰階密度場）。",
+      "Don't 用顏色表達狀態——顏色只分通道；狀態是墨色濃度、振幅與收尾的事。",
+      "Don't 用 --grease 做填色塊、背景、色點，或拿它排任何文字。",
+      "Don't 在標題上方放 eyebrow／kicker／小標。",
+      "Don't 用徽章或 pill 表達狀態。",
+      "Don't 把軸名排進刻度槽（會與端點刻度標籤相撞）；軸名只在圖說。",
+      "Don't 給任何東西加圓角（唯一 token 是 rounded.none: 0）。",
+      "Don't 用零位移光暈當陰影（要帶 y 位移的柔影）。",
+      "Don't 把整頁方格調強到變成明顯的格線——它必須只在近看時才讀得出來。",
+      "Don't 讓各元件散出各自獨立的入場 hover 動畫，破壞單一時鐘。",
+      "Don't 把大頭照插值放大超過約 390px CSS 寬（原圖僅 778px）。",
+      "Don't 為中文名自行拼寫英文羅馬拼音；英文版顯示名固定 BEDO。"
+    ]
+  }
+}

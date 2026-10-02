@@ -1,0 +1,246 @@
+@import './fonts.css';
+
+/* ==========================================================================
+   格盤 / Panel Grid — 設計 token
+   世界：淺中性灰底上浮著純白框板，一格一個主題。
+   唯一的線是 1px 極細框邊，唯一的飽和色是一塊電藍色場。
+   品質基準：rauno.me（已實際擷取校準）。
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ---- 底與板 ---- */
+  --ground: #ebebeb;
+  --ground-deep: #e3e3e3;
+  --panel: #ffffff;
+  --panel-soft: #f6f6f6;
+
+  /* ---- 線：唯一的線，1px ---- */
+  --edge: #dcdcdc;
+  --edge-strong: #c6c6c6;
+
+  /* ---- 墨 ---- */
+  --ink: #0d0d0d; /* 16.2:1 on ground, 19.6:1 on panel */
+  --ink-muted: #636363; /* 4.9:1 on ground, 5.8:1 on panel */
+  --ink-mark: #a8a8a8; /* 僅用於對位記號與刻度，不承載文字 */
+
+  /* ---- 唯一的飽和色：只以整格色場出現一次 ---- */
+  --accent: #1b23ff; /* 7.7:1 against white */
+  --accent-deep: #1219c7;
+  --on-accent: #ffffff;
+
+  /* ---- 字體 ---- */
+  --font-sans: 'Geist', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* ---- 字級 ---- */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 2.125rem);
+  --text-display: clamp(1.875rem, 1.25rem + 3vw, 3.5rem);
+
+  /* ---- 間距 ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.75rem;
+  --space-8: 4rem;
+
+  /* ---- 格盤 ---- */
+  --gap: 0.5rem;
+  --page-max: 1440px;
+  --gutter: clamp(0.5rem, 1.6vw, 1.5rem);
+  --hairline: 1px;
+  --pad: clamp(1.125rem, 2.2vw, 2rem);
+  --measure: 62ch;
+
+  /* ---- 動態：單一時鐘 ---- */
+  --clock: 420ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ==========================================================================
+   重置
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  background-color: var(--ground);
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* 捲動吸附：每一列格板會對齊到視窗頂端，不會停在兩列中間。
+     用 proximity 而不是 mandatory —— mandatory 在內容比視窗高時會把使用者困住。
+     同一列的格板 offsetTop 相同，所以吸附點自然合併成一個。 */
+  scroll-snap-type: y proximity;
+  scroll-padding-top: calc(var(--gap) + 0.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  /* 500 而不是輕量：使用者回報過字太細會刺眼，中文對筆畫粗細特別敏感。
+     刻意不設 -webkit-font-smoothing: antialiased，它在 macOS 上會把字磨細。 */
+  font-weight: 500;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.021em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in oklab, currentColor 32%, transparent);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color var(--clock) var(--ease);
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ==========================================================================
+   瀏覽器表面：這些不是我畫的，但它們也要屬於這個世界
+   ========================================================================== */
+
+::selection {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+:root {
+  caret-color: var(--accent);
+  accent-color: var(--accent);
+  scrollbar-color: var(--edge-strong) var(--ground-deep);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--ground-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--edge-strong);
+  border: 2px solid var(--ground-deep);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-muted);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   共用零件
+   ========================================================================== */
+
+/* 量測值與索引：等寬，表格對位 */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* 面板標籤：極小 mono，排在格板底緣右側，絕不排在標題上方 */
+.tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--panel);
+  border: var(--hairline) solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  text-decoration: none;
+  transform: translateY(-220%);
+  transition: transform var(--clock) var(--ease);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}

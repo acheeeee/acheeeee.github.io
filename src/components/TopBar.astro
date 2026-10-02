@@ -1,0 +1,121 @@
+---
+/**
+ * 頂部索引列。
+ *
+ * 一排極小的刻度記號加語言切換。細節密度來自這種極小的單位，
+ * 不是來自把每個區塊都塞滿。
+ */
+import { LOCALE_PATH, LOCALES, STRINGS, type Locale } from '../data/site';
+
+interface Props {
+  locale: Locale;
+  switchLabel: string;
+}
+
+const { locale, switchLabel } = Astro.props;
+const ticks = Array.from({ length: 14 }, (_, i) => i);
+---
+
+<header class="bar">
+  <div class="bar__index" aria-hidden="true">
+    <span class="bar__box"></span>
+    {ticks.map((i) => <span class="bar__tick" data-major={i % 7 === 0 ? 'true' : undefined}></span>)}
+  </div>
+
+  <nav class="bar__lang" aria-label={switchLabel}>
+    {
+      LOCALES.map((code) => (
+        <a
+          class="mono bar__opt"
+          href={LOCALE_PATH[code]}
+          hreflang={STRINGS[code].htmlLang}
+          lang={STRINGS[code].htmlLang}
+          aria-current={code === locale ? 'true' : undefined}
+          data-active={String(code === locale)}
+          data-lang-choice={code}
+        >
+          {STRINGS[code].localeLabel}
+        </a>
+      ))
+    }
+  </nav>
+</header>
+
+<style>
+  .bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    min-height: 2.75rem;
+    padding-inline: var(--gutter);
+  }
+
+  .bar__index {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .bar__box {
+    width: 15px;
+    height: 9px;
+    border: var(--hairline) solid var(--ink-mark);
+    margin-right: 4px;
+  }
+
+  .bar__tick {
+    width: 1px;
+    height: 9px;
+    background-color: var(--ink-mark);
+  }
+
+  .bar__tick[data-major='true'] {
+    height: 13px;
+    background-color: var(--ink-muted);
+  }
+
+  /* 語言切換靠右絕對定位，讓索引記號保持在視覺中心 */
+  .bar__lang {
+    position: absolute;
+    right: var(--gutter);
+    display: flex;
+    gap: 1px;
+  }
+
+  .bar__opt {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-muted);
+    border: var(--hairline) solid transparent;
+    transition:
+      color var(--clock) var(--ease),
+      border-color var(--clock) var(--ease);
+  }
+
+  .bar__opt:hover {
+    color: var(--ink);
+    border-color: var(--edge);
+  }
+
+  .bar__opt[data-active='true'] {
+    color: var(--on-accent);
+    background-color: var(--accent);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('[data-lang-choice]').forEach((link) => {
+    link.addEventListener('click', () => {
+      try {
+        localStorage.setItem('bedo.lang', link.dataset.langChoice || '');
+      } catch {
+        /* 無痕模式寫不進去就算了，導覽照走 */
+      }
+    });
+  });
+</script>

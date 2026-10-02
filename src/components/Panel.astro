@@ -1,0 +1,222 @@
+---
+/**
+ * 格板：格盤的一格。
+ *
+ * 一格一個主題。格子大小刻意差異很大 —— 同樣大小的格子排成一片就是卡片牆，
+ * 那正是這個類別最常見的偷懶做法。
+ *
+ * 細節密度來自極小的單位：四角的十字對位記號、底緣右側的 mono 標籤。
+ * 標籤絕不排在標題上方（eyebrow 是禁令）。
+ */
+interface Props {
+  /** 底緣右側的面板標籤 */
+  tag: string;
+  /** 飽和色場：整頁只有一格可以用 */
+  accent?: boolean;
+  /** 進行中：邊緣實線加一個實心方點；已完成：邊緣虛線、內容降為中性 */
+  state?: 'live' | 'closed' | null;
+  /** 格內是否自行處理內距（圖表格需要滿版） */
+  bleed?: boolean;
+  /**
+   * 跨欄數（12 欄網格）。三個斷點各自指定。
+   * 必須由 prop 傳入而不是外部 class —— Astro 的樣式作用域只套用在
+   * 宣告樣式的那個元件的模板上，從 Home 傳 class 進來拿不到 Home 的作用域，
+   * 選擇器永遠不會匹配。這個坑踩過一次。
+   */
+  span?: number;
+  spanMd?: number;
+  spanSm?: number;
+  class?: string;
+}
+
+const {
+  tag,
+  accent = false,
+  state = null,
+  bleed = false,
+  span = 12,
+  spanMd,
+  spanSm,
+  class: className = '',
+} = Astro.props;
+
+const spanVars = `--span:${span};--span-md:${spanMd ?? span};--span-sm:${spanSm ?? 12}`;
+---
+
+<section
+  class:list={['panel', className]}
+  data-accent={accent ? 'true' : undefined}
+  data-state={state ?? undefined}
+  data-bleed={bleed ? 'true' : undefined}
+  style={spanVars}
+>
+  <span class="panel__cross" data-at="tl" aria-hidden="true"></span>
+  <span class="panel__cross" data-at="tr" aria-hidden="true"></span>
+  <span class="panel__cross" data-at="bl" aria-hidden="true"></span>
+  <span class="panel__cross" data-at="br" aria-hidden="true"></span>
+
+  <div class="panel__body">
+    <slot />
+  </div>
+
+  <footer class="panel__foot">
+    {state === 'live' && <span class="panel__dot" aria-hidden="true"></span>}
+    <span class="tag panel__tag">{tag}</span>
+  </footer>
+</section>
+
+<style>
+  .panel {
+    position: relative;
+    grid-column: span var(--span, 12);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background-color: var(--panel);
+    border: var(--hairline) solid var(--edge);
+    transition:
+      border-color var(--clock) var(--ease),
+      transform var(--clock) var(--ease);
+  }
+
+  .panel:hover {
+    border-color: var(--edge-strong);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .panel:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  /* 唯一的飽和色場 */
+  .panel[data-accent='true'] {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .panel[data-accent='true']:hover {
+    border-color: var(--accent-deep);
+  }
+
+  /* 已完成：邊緣轉虛線，內容降為中性 */
+  .panel[data-state='closed'] {
+    border-style: dashed;
+    background-color: var(--panel-soft);
+  }
+
+  .panel[data-state='closed'] .panel__body {
+    color: var(--ink-muted);
+  }
+
+  .panel__body {
+    flex: 1;
+    min-width: 0;
+    padding: var(--pad);
+  }
+
+  .panel[data-bleed='true'] .panel__body {
+    padding: 0;
+  }
+
+  /* 四角的十字對位記號 */
+  .panel__cross {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .panel__cross::before,
+  .panel__cross::after {
+    content: '';
+    position: absolute;
+    background-color: var(--ink-mark);
+  }
+
+  .panel__cross::before {
+    top: 3px;
+    left: 0;
+    width: 7px;
+    height: 1px;
+  }
+
+  .panel__cross::after {
+    top: 0;
+    left: 3px;
+    width: 1px;
+    height: 7px;
+  }
+
+  .panel[data-accent='true'] .panel__cross::before,
+  .panel[data-accent='true'] .panel__cross::after {
+    background-color: color-mix(in oklab, var(--on-accent) 55%, transparent);
+  }
+
+  .panel__cross[data-at='tl'] {
+    top: 6px;
+    left: 6px;
+  }
+
+  .panel__cross[data-at='tr'] {
+    top: 6px;
+    right: 6px;
+  }
+
+  .panel__cross[data-at='bl'] {
+    bottom: 6px;
+    left: 6px;
+  }
+
+  .panel__cross[data-at='br'] {
+    bottom: 6px;
+    right: 6px;
+  }
+
+  /* 底緣：標籤右對齊，進行中多一個實心方點 */
+  .panel__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: 0 var(--pad) calc(var(--pad) * 0.62);
+  }
+
+  .panel[data-bleed='true'] .panel__foot {
+    padding: var(--space-3) var(--space-4);
+    border-top: var(--hairline) solid color-mix(in oklab, var(--edge) 70%, transparent);
+  }
+
+  .panel[data-accent='true'][data-bleed='true'] .panel__foot {
+    border-top-color: color-mix(in oklab, var(--on-accent) 28%, transparent);
+  }
+
+  .panel[data-accent='true'] .panel__tag {
+    color: color-mix(in oklab, var(--on-accent) 82%, transparent);
+  }
+
+  .panel__dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent);
+  }
+
+  .panel[data-accent='true'] .panel__dot {
+    background-color: var(--on-accent);
+  }
+
+  @media (width <= 64rem) {
+    .panel {
+      grid-column: span var(--span-md, 12);
+    }
+  }
+
+  @media (width <= 52rem) {
+    .panel {
+      grid-column: span var(--span-sm, 12);
+    }
+  }
+</style>

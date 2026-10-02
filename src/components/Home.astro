@@ -1,0 +1,425 @@
+---
+/**
+ * 首頁：格盤。一格一個主題，格子大小刻意差異很大。
+ *
+ * 讀序：頂部索引列 → 自我介紹（最大格）→ 照片 → 發話波形（唯一的飽和色場）
+ *      → 研究方向 → 兩個進行中的專題 → 已完成 → 閱讀紀錄 → 聯絡。
+ *
+ * 兩個語言共用這一份組成，差異全部來自 data/site.ts。
+ */
+import TopBar from './TopBar.astro';
+import Panel from './Panel.astro';
+import Waveform from './Waveform.astro';
+import PastedPhoto from './PastedPhoto.astro';
+import { CONTACT, READING, STRINGS, WORK, type Locale } from '../data/site';
+import { UTTERANCE_EN, UTTERANCE_ZH } from '../lib/utterance';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = STRINGS[locale];
+const en = locale === 'en';
+
+const utterance = en ? UTTERANCE_EN : UTTERANCE_ZH;
+const active = WORK.filter((w) => w.status === 'active');
+const closed = WORK.filter((w) => w.status === 'closed');
+
+const L = {
+  about: en ? 'about' : '自我介紹',
+  portrait: en ? 'portrait' : '照片',
+  utterance: en ? 'utterance' : '發話',
+  field: en ? 'research' : '研究方向',
+  work: en ? 'work' : '專題',
+  closed: en ? 'closed' : '已完成',
+  reading: en ? 'reading' : '閱讀紀錄',
+  contact: en ? 'contact' : '聯絡',
+  affiliation: en ? 'affiliation' : '所屬',
+  status: en ? 'status' : '狀態',
+  source: en ? 'source' : '出處',
+  entries: en ? 'entries' : '計數',
+  jump: en ? 'Read the work' : '往下看進行中的工作',
+};
+
+const photoAlt = en
+  ? 'Portrait of BEDO (李嘉峻), head and shoulders, in a dark suit and tie.'
+  : '李嘉峻的個人照，正面齊肩，深色西裝與領帶。';
+---
+
+<TopBar locale={locale} switchLabel={t.langSwitchLabel} />
+<a class="skip-link" href="#main">{t.skipToContent}</a>
+
+<main id="main" class="grid">
+  {/* ---- 自我介紹：最大格，不對稱縮排 ---- */}
+  <Panel tag={L.about} span={8} spanMd={8} spanSm={12}>
+    <div class="aboutstack">
+    <h1 class="intro">
+      {
+        t.introLines.map((line, i) => (
+          <span class="intro__line" data-indent={i % 2 === 1 ? 'true' : undefined}>{line}</span>
+        ))
+      }
+    </h1>
+    <a class="jump" href="#work">
+      <svg class="jump__arrow" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+        <path d="M7 1v12M2.5 8.5 7 13l4.5-4.5" />
+      </svg>
+      <span>{L.jump}</span>
+    </a>
+    </div>
+  </Panel>
+
+  {/* ---- 照片 ---- */}
+  <Panel tag={L.portrait} bleed span={4} spanMd={4} spanSm={6}>
+    <PastedPhoto alt={photoAlt} />
+  </Panel>
+
+  {/* ---- 發話波形：整頁唯一的飽和色場 ---- */}
+  <Panel tag={L.utterance} accent bleed span={7} spanMd={7} spanSm={12}>
+    <Waveform
+      id="utterance"
+      segments={utterance}
+      caption={t.waveCaption}
+      alt={t.waveAlt}
+      ampAxisLabel={t.scaleAmp}
+      timeAxisLabel={t.scaleTime}
+      readout={t.readout}
+    />
+  </Panel>
+
+  {/* ---- 研究方向 ---- */}
+  <Panel tag={L.field} span={5} spanMd={5} spanSm={12}>
+    <h2 class="h">{t.field}</h2>
+    <p class="body">{t.lede}</p>
+    <dl class="fields">
+      <div class="fields__row">
+        <dt class="tag">{L.affiliation}</dt>
+        <dd class="fields__val">{t.affiliation}</dd>
+      </div>
+    </dl>
+  </Panel>
+
+  {/* ---- 進行中的專題：一格一個 ---- */}
+  {
+    active.map((entry, i) => (
+      <Panel
+        tag={`${L.work} / ${entry.id}`}
+        state="live"
+        span={i === 0 ? 7 : 5}
+        spanMd={i === 0 ? 7 : 5}
+        spanSm={12}
+      >
+        <h2 class="h" id={i === 0 ? 'work' : undefined}>{entry.title[locale]}</h2>
+        {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
+        <dl class="fields">
+          <div class="fields__row">
+            <dt class="tag">{L.status}</dt>
+            <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
+          </div>
+          {entry.source && (
+            <div class="fields__row">
+              <dt class="tag">{L.source}</dt>
+              <dd class="fields__val">
+                <a href={entry.source.href} rel="noopener noreferrer" target="_blank">
+                  {entry.source.label}
+                </a>
+              </dd>
+            </div>
+          )}
+        </dl>
+      </Panel>
+    ))
+  }
+
+  {/* ---- 已完成 ---- */}
+  {
+    closed.map((entry) => (
+      <Panel tag={L.closed} state="closed" span={4} spanMd={5} spanSm={12}>
+        <h2 class="h h--sm">{entry.title[locale]}</h2>
+        {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
+        <dl class="fields">
+          <div class="fields__row">
+            <dt class="tag">{L.status}</dt>
+            <dd class="mono fields__val fields__val--mono">{t.statusLabel.closed}</dd>
+          </div>
+        </dl>
+      </Panel>
+    ))
+  }
+
+  {/* ---- 閱讀紀錄：零條目時渲染誠實的空狀態 ---- */}
+  <Panel tag={L.reading} span={3} spanMd={4} spanSm={12}>
+    <h2 class="h h--sm">{t.sections.reading}</h2>
+    {
+      READING.length === 0 ? (
+        <p class="body body--sm">{t.readingEmpty}</p>
+      ) : (
+        <ul class="list">
+          {READING.map((r) => (
+            <li class="list__item">
+              <a href={r.href} rel="noopener noreferrer" target="_blank">{r.title}</a>
+              <span class="mono list__meta">{r.venue} · {r.year}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    <dl class="fields">
+      <div class="fields__row">
+        <dt class="tag">{L.entries}</dt>
+        <dd class="mono fields__val fields__val--mono">{t.readingCount(READING.length)}</dd>
+      </div>
+    </dl>
+  </Panel>
+
+  {/* ---- 聯絡 ---- */}
+  <Panel tag={L.contact} accent span={5} spanMd={3} spanSm={12}>
+    <h2 class="h h--sm">{t.sections.contact}</h2>
+    <p class="body body--sm">{t.contactIntro}</p>
+    <ul class="links">
+      {
+        CONTACT.map((c) => (
+          <li class="links__row">
+            <span class="tag">{c.label}</span>
+            <a
+              class="links__val"
+              href={c.href}
+              rel={c.href.startsWith('mailto:') ? undefined : 'me noopener noreferrer'}
+              target={c.href.startsWith('mailto:') ? undefined : '_blank'}
+            >
+              {c.value}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Panel>
+</main>
+
+<footer class="foot">
+  <p class="foot__note">{t.footerNote}</p>
+  <a class="mono foot__repo" href="https://github.com/acheeeee/acheeeee.github.io">
+    acheeeee/acheeeee.github.io
+  </a>
+</footer>
+
+<style>
+  /* ==========================================================
+     格盤：12 欄，格子大小差異很大。
+     同樣大小的格子排成一片就是卡片牆，那是這個類別的偷懶做法。
+     ========================================================== */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--gap);
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: 0 var(--gutter) var(--space-6);
+  }
+
+
+
+
+
+
+
+
+
+
+  /* ==========================================================
+     自我介紹：不對稱縮排。張力來自縮排，不是居中。
+     ========================================================== */
+  /* 主動作推到格板底部：空間被刻意用掉，不是留著空白 */
+  .aboutstack {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-6);
+    height: 100%;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-display);
+    font-weight: 450;
+    letter-spacing: -0.028em;
+    line-height: 1.08;
+  }
+
+  .intro__line[data-indent='true'] {
+    padding-left: 1.6em;
+  }
+
+  .jump {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.5rem 0.9rem 0.5rem 0.65rem;
+    border: var(--hairline) solid var(--edge-strong);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color var(--clock) var(--ease),
+      border-color var(--clock) var(--ease),
+      color var(--clock) var(--ease);
+  }
+
+  .jump:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .jump__arrow {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    transition: transform var(--clock) var(--ease);
+  }
+
+  .jump:hover .jump__arrow {
+    transform: translateY(2px);
+  }
+
+  /* ==========================================================
+     格內共用排版
+     ========================================================== */
+  .h {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-3);
+  }
+
+  .h--sm {
+    font-size: var(--text-lg);
+  }
+
+  .body {
+    max-width: var(--measure);
+    color: var(--ink-muted);
+  }
+
+  .body--sm {
+    font-size: var(--text-sm);
+  }
+
+  .fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    margin: 0;
+    margin-top: var(--space-5);
+  }
+
+  .fields__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .fields__val {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  .fields__val--mono {
+    font-size: var(--text-xs);
+  }
+
+  .list {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .list__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: var(--text-sm);
+  }
+
+  .list__meta {
+    font-size: var(--text-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+  }
+
+  .links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+  }
+
+  /* 飽和色格裡的文字與線要換成 on-accent 推出的值，否則深灰字在藍底上讀不到。
+     用 :global 指定祖先，因為 data-accent 在 Panel 渲染的元素上，拿不到 Home 的作用域。 */
+  :global(.panel[data-accent='true']) .body,
+  :global(.panel[data-accent='true']) .tag {
+    color: color-mix(in oklab, var(--on-accent) 84%, transparent);
+  }
+
+  :global(.panel[data-accent='true']) .links__row {
+    border-top-color: color-mix(in oklab, var(--on-accent) 32%, transparent);
+  }
+
+  .links__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-top: var(--space-2);
+    border-top: var(--hairline) solid var(--edge);
+    min-width: 0;
+  }
+
+  .links__val {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  /* ==========================================================
+     頁腳
+     ========================================================== */
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-5);
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: var(--space-5) var(--gutter) var(--space-7);
+  }
+
+  .foot__note,
+  .foot__repo {
+    font-size: var(--text-xs);
+    color: var(--ink-muted);
+  }
+
+  .foot__repo {
+    letter-spacing: 0.02em;
+  }
+
+  /* ==========================================================
+     窄螢幕：格盤塌成較少的欄，但格子大小差異保留
+     ========================================================== */
+  @media (width <= 52rem) {
+    .intro__line[data-indent='true'] {
+      padding-left: 1.1em;
+    }
+  }
+</style>
