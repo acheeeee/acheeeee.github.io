@@ -169,7 +169,7 @@ primary: false,
 
 ```bash
 sips -s format png src/assets/favicon-source.jpg --out /tmp/src.png
-sips -c 421 421 /tmp/src.png --out /tmp/square.png        # 421 = 原圖短邊，換圖要改
+sips -c 773 773 /tmp/src.png --out /tmp/square.png        # 773 = 原圖短邊（目前的圖本來就是正方形），換圖要改
 sips -z 32 32   /tmp/square.png --out public/favicon-32.png
 sips -z 192 192 /tmp/square.png --out public/favicon-192.png
 sips -z 180 180 /tmp/square.png --out public/apple-touch-icon.png
