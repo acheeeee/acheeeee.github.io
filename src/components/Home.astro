@@ -1,18 +1,18 @@
 ---
 /**
- * 首頁：格盤。一格一個主題，格子大小刻意差異很大。
+ * 首頁：橫向軌道。整頁左右移動，不上下捲（使用者指定，參考 rauno.me）。
  *
- * 讀序：頂部索引列 → 自我介紹（最大格）→ 照片 → 發話波形（唯一的飽和色場）
- *      → 研究方向 → 兩個進行中的專題 → 已完成 → 閱讀紀錄 → 聯絡。
+ * 軌道由「欄」組成，每欄裝一到兩格，欄寬刻意不同。
+ * 滑鼠滾輪的上下會被轉成左右；觸控板與觸控螢幕本來就能橫向滑。
  *
- * 兩個語言共用這一份組成，差異全部來自 data/site.ts。
+ * 顏色規則（使用者指定，見 MAINTENANCE.md）：
+ *   藍色 = 研究方向、現在的主要計畫（WORK 裡 primary: true 的那一筆）、聯絡。
+ *   其他專題、side project、已完成的一律白色。
  */
 import TopBar from './TopBar.astro';
 import Panel from './Panel.astro';
-import Waveform from './Waveform.astro';
 import PastedPhoto from './PastedPhoto.astro';
-import { CONTACT, READING, STRINGS, WORK, type Locale } from '../data/site';
-import { UTTERANCE_EN, UTTERANCE_ZH } from '../lib/utterance';
+import { CONTACT, EDUCATION, READING, STRINGS, WORK, type Locale } from '../data/site';
 
 interface Props {
   locale: Locale;
@@ -22,217 +22,490 @@ const { locale } = Astro.props;
 const t = STRINGS[locale];
 const en = locale === 'en';
 
-const utterance = en ? UTTERANCE_EN : UTTERANCE_ZH;
-const active = WORK.filter((w) => w.status === 'active');
+const primary = WORK.filter((w) => w.status === 'active' && w.primary);
+const sideActive = WORK.filter((w) => w.status === 'active' && !w.primary);
 const closed = WORK.filter((w) => w.status === 'closed');
 
 const L = {
-  about: en ? 'about' : '自我介紹',
-  portrait: en ? 'portrait' : '照片',
-  utterance: en ? 'utterance' : '發話',
-  field: en ? 'research' : '研究方向',
-  work: en ? 'work' : '專題',
-  closed: en ? 'closed' : '已完成',
-  reading: en ? 'reading' : '閱讀紀錄',
-  contact: en ? 'contact' : '聯絡',
   affiliation: en ? 'affiliation' : '所屬',
+  lab: en ? 'lab' : '實驗室',
   status: en ? 'status' : '狀態',
   source: en ? 'source' : '出處',
+  repo: en ? 'code' : '程式碼',
   entries: en ? 'entries' : '計數',
-  jump: en ? 'Read the work' : '往下看進行中的工作',
+  total: en ? 'total' : '總計',
+  read: en ? 'read' : '讀完',
+  reading: en ? 'reading' : '在讀',
+  span: en ? 'published' : '發表年份',
+  expand: en ? 'show all' : '展開全部',
+  collapse: en ? 'collapse' : '收合',
+  education: en ? 'Education' : '教育背景',
+  current: en ? 'current' : '就讀中',
+  progress: en ? 'progress' : '進度',
+  state: en
+    ? { done: 'done', now: 'now', next: 'next' }
+    : { done: '完成', now: '進行中', next: '接下來' },
 };
 
+
 const photoAlt = en
-  ? 'Portrait of BEDO (李嘉峻), head and shoulders, in a dark suit and tie.'
+  ? 'Portrait of LI, CHIA-CHUN (BEDO), head and shoulders, in a dark suit and tie.'
   : '李嘉峻的個人照，正面齊肩，深色西裝與領帶。';
 ---
 
-<TopBar locale={locale} switchLabel={t.langSwitchLabel} />
+<TopBar locale={locale} switchLabel={t.langSwitchLabel} scrubberLabel={t.scrubberLabel} />
 <a class="skip-link" href="#main">{t.skipToContent}</a>
 
-<main id="main" class="grid">
-  {/* ---- 自我介紹：最大格，不對稱縮排 ---- */}
-  <Panel tag={L.about} span={8} spanMd={8} spanSm={12}>
-    <div class="aboutstack">
-    <h1 class="intro">
-      {
-        t.introLines.map((line, i) => (
-          <span class="intro__line" data-indent={i % 2 === 1 ? 'true' : undefined}>{line}</span>
-        ))
-      }
-    </h1>
-    <a class="jump" href="#work">
-      <svg class="jump__arrow" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-        <path d="M7 1v12M2.5 8.5 7 13l4.5-4.5" />
-      </svg>
-      <span>{L.jump}</span>
-    </a>
+<main id="main" class="track-wrap">
+  <div class="track" id="track" tabindex="-1">
+    {/* ---- 欄 1：自我介紹 ---- */}
+    <div class="col col--intro" id="intro-col">
+      <Panel>
+        <span class="disc" aria-hidden="true"></span>
+        <div class="intro-stack">
+          <div class="mark">
+            <h1 class="mark__name">{t.intro.name}</h1>
+            <p class="mark__sub">
+              <span class="mark__formal">{t.intro.formal}</span>
+              <span class="mark__rule" aria-hidden="true"></span>
+              <span class="mark__alias">{t.intro.alias}</span>
+            </p>
+          </div>
+          <a class="jump" href="#work">
+            <span>{t.jumpAction}</span>
+            <svg class="jump__arrow" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+              <path d="M1 7h12M8.5 2.5 13 7l-4.5 4.5" />
+            </svg>
+          </a>
+        </div>
+      </Panel>
     </div>
-  </Panel>
 
-  {/* ---- 照片 ---- */}
-  <Panel tag={L.portrait} bleed span={4} spanMd={4} spanSm={6}>
-    <PastedPhoto alt={photoAlt} />
-  </Panel>
-
-  {/* ---- 發話波形：整頁唯一的飽和色場 ---- */}
-  <Panel tag={L.utterance} accent bleed span={7} spanMd={7} spanSm={12}>
-    <Waveform
-      id="utterance"
-      segments={utterance}
-      caption={t.waveCaption}
-      alt={t.waveAlt}
-      ampAxisLabel={t.scaleAmp}
-      timeAxisLabel={t.scaleTime}
-      readout={t.readout}
-    />
-  </Panel>
-
-  {/* ---- 研究方向 ---- */}
-  <Panel tag={L.field} span={5} spanMd={5} spanSm={12}>
-    <h2 class="h">{t.field}</h2>
-    <p class="body">{t.lede}</p>
-    <dl class="fields">
-      <div class="fields__row">
-        <dt class="tag">{L.affiliation}</dt>
-        <dd class="fields__val">{t.affiliation}</dd>
-      </div>
-    </dl>
-  </Panel>
-
-  {/* ---- 進行中的專題：一格一個 ---- */}
-  {
-    active.map((entry, i) => (
-      <Panel
-        tag={`${L.work} / ${entry.id}`}
-        state="live"
-        span={i === 0 ? 7 : 5}
-        spanMd={i === 0 ? 7 : 5}
-        spanSm={12}
-      >
-        <h2 class="h" id={i === 0 ? 'work' : undefined}>{entry.title[locale]}</h2>
-        {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
-        <dl class="fields">
-          <div class="fields__row">
-            <dt class="tag">{L.status}</dt>
-            <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
-          </div>
-          {entry.source && (
-            <div class="fields__row">
-              <dt class="tag">{L.source}</dt>
-              <dd class="fields__val">
-                <a href={entry.source.href} rel="noopener noreferrer" target="_blank">
-                  {entry.source.label}
-                </a>
-              </dd>
-            </div>
-          )}
-        </dl>
+    {/* ---- 欄 2：照片（白底填滿空間，照片依原比例靠左、右邊暫時留空）+ 研究方向（壓扁、貼齊欄底） ---- */}
+    <div class="col col--photo">
+      <Panel bleed grow={1}>
+        <div class="photocell">
+          <PastedPhoto alt={photoAlt} />
+          <section class="edu" aria-label={L.education}>
+            <h2 class="edu__head">{L.education}</h2>
+            <ol class="edu__list">
+              {
+                EDUCATION.map((e) => (
+                  <li class="edu__item">
+                    <span class="mono edu__level">
+                      {e.level[locale]}
+                      {(e.period || e.current) && <span class="edu__period">{e.period ?? L.current}</span>}
+                    </span>
+                    <span class="edu__school">{e.school[locale]}</span>
+                    {e.department && <span class="edu__program">{e.department[locale]}</span>}
+                  </li>
+                ))
+              }
+            </ol>
+          </section>
+        </div>
       </Panel>
-    ))
-  }
-
-  {/* ---- 已完成 ---- */}
-  {
-    closed.map((entry) => (
-      <Panel tag={L.closed} state="closed" span={4} spanMd={5} spanSm={12}>
-        <h2 class="h h--sm">{entry.title[locale]}</h2>
-        {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
-        <dl class="fields">
+      <Panel grow={0} compact>
+        <h2 class="h h--line">{t.field}</h2>
+        <dl class="fields fields--tight">
           <div class="fields__row">
-            <dt class="tag">{L.status}</dt>
-            <dd class="mono fields__val fields__val--mono">{t.statusLabel.closed}</dd>
+            <dt class="tag">{L.affiliation}</dt>
+            <dd class="fields__val">{t.affiliation}</dd>
+          </div>
+          <div class="fields__row">
+            <dt class="tag">{L.lab}</dt>
+            <dd class="fields__val">
+              <a href={t.lab.href} rel="noopener noreferrer" target="_blank">{t.lab.label}</a>
+            </dd>
           </div>
         </dl>
       </Panel>
-    ))
-  }
+    </div>
 
-  {/* ---- 閱讀紀錄：零條目時渲染誠實的空狀態 ---- */}
-  <Panel tag={L.reading} span={3} spanMd={4} spanSm={12}>
-    <h2 class="h h--sm">{t.sections.reading}</h2>
+    {/* ---- 欄 3：現在的主要計畫（藍） ---- */}
     {
-      READING.length === 0 ? (
-        <p class="body body--sm">{t.readingEmpty}</p>
-      ) : (
-        <ul class="list">
-          {READING.map((r) => (
-            <li class="list__item">
-              <a href={r.href} rel="noopener noreferrer" target="_blank">{r.title}</a>
-              <span class="mono list__meta">{r.venue} · {r.year}</span>
-            </li>
-          ))}
-        </ul>
-      )
+      primary.map((entry, i) => (
+        <div class="col col--primary">
+          <Panel accent id={i === 0 ? 'work' : undefined}>
+            <h2 class="h h--lg">{entry.title[locale]}</h2>
+            {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
+            <dl class="fields">
+              <div class="fields__row">
+                <dt class="tag">{L.status}</dt>
+                <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
+              </div>
+              {entry.source && (
+                <div class="fields__row">
+                  <dt class="tag">{L.source}</dt>
+                  <dd class="fields__val">
+                    <a href={entry.source.href} rel="noopener noreferrer" target="_blank">{entry.source.label}</a>
+                  </dd>
+                </div>
+              )}
+            </dl>
+            {entry.progress && (
+              <div class="progress">
+                <p class="tag progress__head">
+                  {L.progress} · <span class="mono">{entry.progress.asOf}</span>
+                </p>
+                <ol class="progress__list">
+                  {entry.progress.items.map((item) => (
+                    <li class="progress__item" data-state={item.state}>
+                      <span class="mono progress__state">{L.state[item.state]}</span>
+                      <span>{item.text[locale]}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </Panel>
+        </div>
+      ))
     }
-    <dl class="fields">
-      <div class="fields__row">
-        <dt class="tag">{L.entries}</dt>
-        <dd class="mono fields__val fields__val--mono">{t.readingCount(READING.length)}</dd>
-      </div>
-    </dl>
-  </Panel>
 
-  {/* ---- 聯絡 ---- */}
-  <Panel tag={L.contact} accent span={5} spanMd={3} spanSm={12}>
-    <h2 class="h h--sm">{t.sections.contact}</h2>
-    <p class="body body--sm">{t.contactIntro}</p>
-    <ul class="links">
+    {/* ---- 欄 4：其他進行中 + 已完成（白） ---- */}
+    <div class="col col--work">
       {
-        CONTACT.map((c) => (
-          <li class="links__row">
-            <span class="tag">{c.label}</span>
-            <a
-              class="links__val"
-              href={c.href}
-              rel={c.href.startsWith('mailto:') ? undefined : 'me noopener noreferrer'}
-              target={c.href.startsWith('mailto:') ? undefined : '_blank'}
-            >
-              {c.value}
-            </a>
-          </li>
+        sideActive.map((entry) => (
+          <Panel grow={0.58} id={primary.length === 0 ? 'work' : undefined}>
+            <h2 class="h">{entry.title[locale]}</h2>
+            {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
+            <dl class="fields">
+              <div class="fields__row">
+                <dt class="tag">{L.status}</dt>
+                <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
+              </div>
+            </dl>
+          </Panel>
         ))
       }
-    </ul>
-  </Panel>
-</main>
+      {
+        closed.map((entry) => (
+          <Panel closed grow={1.4}>
+            <h2 class="h">{entry.title[locale]}</h2>
+            {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
+            <dl class="fields">
+              <div class="fields__row">
+                <dt class="tag">{L.status}</dt>
+                <dd class="mono fields__val fields__val--mono">{t.statusLabel.closed}</dd>
+              </div>
+              {entry.repo && (
+                <div class="fields__row">
+                  <dt class="tag">{L.repo}</dt>
+                  <dd class="fields__val">
+                    <a href={entry.repo.href} rel="noopener noreferrer" target="_blank">{entry.repo.label}</a>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </Panel>
+        ))
+      }
+    </div>
 
-<footer class="foot">
-  <p class="foot__note">{t.footerNote}</p>
-  <a class="mono foot__repo" href="https://github.com/acheeeee/acheeeee.github.io">
-    acheeeee/acheeeee.github.io
-  </a>
-</footer>
+    {/* ---- 欄 5：閱讀紀錄（上）+ 聯絡（下） ----
+         閱讀紀錄收合時列出論文標題（每篇一行，放不下就淡出並顯示「⋯」）；點這一格才往下展開（蓋過下面的聯絡格，清單在格內上下捲），再點一次或按 Esc 收合。
+         滑鼠移上去只是跟其他格一樣稍微放大，不會展開。 */}
+    <div
+      class="col col--reading"
+      id="reading-col"
+      data-expanded="false"
+    >
+      <Panel grow={1}>
+        <div class="readingstack">
+        <button
+          class="reading__toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="reading-list"
+          disabled={READING.length === 0}
+        >
+          <span class="reading__titlerow">
+            <span class="h reading__title">{t.sections.reading}</span>
+            <span class="reading__count">
+              <span class="tag">{L.total}</span>
+              <span class="stats__num">{READING.length}</span>
+            </span>
+          </span>
+          {READING.length > 0 && (
+            <span class="mono reading__hint">
+              <span class="reading__hint-open">{L.expand} ↓</span>
+              <span class="reading__hint-close">{L.collapse} ↑</span>
+            </span>
+          )}
+        </button>
+
+
+        {
+          READING.length === 0 ? (
+            <p class="body body--sm">{t.readingEmpty}</p>
+          ) : (
+            <ol class="list" id="reading-list">
+              {READING.map((r) => (
+                <li class="list__item">
+                  <a href={r.href} rel="noopener noreferrer" target="_blank">{r.title}</a>
+                  <span class="mono list__meta">{r.authors} · {r.venue} · {r.year}</span>
+                </li>
+              ))}
+            </ol>
+          )
+        }
+        <p class="mono reading__more" aria-hidden="true">⋯</p>
+        </div>
+      </Panel>
+
+      {/* 聯絡（藍），與閱讀紀錄同一欄 */}
+      <Panel accent grow={0}>
+        <h2 class="h">{t.sections.contact}</h2>
+        <p class="body body--sm">{t.contactIntro}</p>
+        <ul class="links">
+          {
+            CONTACT.map((c) => (
+              <li class="links__row">
+                <span class="tag">{c.label}</span>
+                <a
+                  class="links__val"
+                  href={c.href}
+                  rel={c.href.startsWith('mailto:') ? undefined : 'me noopener noreferrer'}
+                  target={c.href.startsWith('mailto:') ? undefined : '_blank'}
+                >
+                  {c.value}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </Panel>
+    </div>
+
+    {/* ---- 軌道終點 ---- */}
+    <div class="col col--end">
+      <a class="mono end__repo" href="https://github.com/acheeeee/acheeeee.github.io">acheeeee.github.io</a>
+    </div>
+  </div>
+</main>
 
 <style>
   /* ==========================================================
-     格盤：12 欄，格子大小差異很大。
-     同樣大小的格子排成一片就是卡片牆，那是這個類別的偷懶做法。
+     橫向軌道
      ========================================================== */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: var(--gap);
-    width: 100%;
-    max-width: var(--page-max);
-    margin-inline: auto;
-    padding: 0 var(--gutter) var(--space-6);
+  .track-wrap {
+    flex: 1;
+    min-height: 0;
   }
 
+  .track {
+    --u: clamp(13rem, 17vw, 19rem);
+    display: flex;
+    gap: var(--gap);
+    height: 100%;
+    /* 使用者要求：格子高度約為原本的 70%，上下各留 15% 空白。
+       這段空白同時讓 hover 放大的格子不會被切掉。 */
+    --bar-h: 5rem;
+    /* 上限：格子至少保留 36rem 高，矮螢幕（例如 1280×720 筆電）先保證內容放得下，再談留白 */
+    padding-block: clamp(
+      1rem,
+      calc((100dvh - var(--bar-h)) * 0.15),
+      calc((100dvh - var(--bar-h) - 36rem) / 2)
+    );
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* 桌機不吸附：吸附會把滑鼠滾輪每一格的小位移拉回原位，看起來像滾不動。
+       （這個坑踩過一次。）手機才吸附，見下方窄螢幕區塊。 */
+    scroll-padding-inline: var(--gutter);
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
 
+  .track::-webkit-scrollbar {
+    display: none;
+  }
 
+  .track:focus {
+    outline: none;
+  }
 
+  .col {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    min-height: 0;
+    scroll-snap-align: start;
+  }
 
+  .col--intro { width: calc(var(--u) * 2.6); }
 
+  /* 全部格子一起縮放：頁面在最左邊時所有欄放大（--track-zoom 最多 1.2），往右捲動時統一線性縮回 1。
+     用 zoom 而不是 transform：zoom 會真的佔版面，格子之間不會互相蓋住。
+     align-self: center 讓放大時上下平均長出去，吃掉軌道上下的留白。 */
+  .track > .col {
+    zoom: var(--track-zoom, 1);
+    align-self: center;
+    /* zoom 底下百分比高度會被抵銷（量過：視覺高度不變），所以要自己乘回去，上下才會一起長大 */
+    height: calc(100% * var(--track-zoom, 1));
+  }
+  .col--photo { width: calc(var(--u) * 2.35); }
+  .col--primary { width: calc(var(--u) * 2.9); }
+  .col--work { width: calc(var(--u) * 2.65); }
+  .col--reading { width: calc(var(--u) * 2.1); }
 
+  /* ---- 照片格：照片靠左（尺寸由 PastedPhoto 依原圖比例算），學歷放進右邊留白 ---- */
+  .photocell {
+    position: absolute;
+    inset: 0;
+    container-type: size;
+  }
 
+  /* 照片寬（原圖比例 778×1052，以格子內高度為準）——照片與教育背景共用這一個值。
+     .frame 不是容器，所以照片裡的 cqw/cqh 也是相對 .photocell。 */
+  :global(.photocell .frame),
+  .edu {
+    --photo-w: min(100cqw - 3rem, (100cqh - 3rem) / 1.352);
+  }
 
+  /* 教育背景的左緣 = 留白 + 照片寬 + 間距 */
+  .edu {
+    position: absolute;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    left: calc(1.5rem + var(--photo-w) + 1.25rem);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* 「教育背景」是這塊的標題，跟其他格的標題同一個字級 */
+  .edu__head {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-xl);
+    font-weight: 500;
+  }
+
+  .edu__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .edu__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-block: var(--space-3);
+    border-top: var(--hairline) solid var(--edge);
+  }
+
+  .edu__school {
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .edu__program {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--ink-muted);
+  }
+
+  .edu__level {
+    display: flex;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .edu__period {
+    color: var(--accent);
+  }
+
+  /* 格子偏直（手機）時照片會吃掉整個寬度：改成照片約 42% 寬，學歷照樣放右邊 */
+  @container (aspect-ratio < 1.15) {
+    :global(.photocell .frame),
+    .edu {
+      --photo-w: min((100cqw - 3rem) * 0.42, (100cqh - 3rem) / 1.352);
+    }
+
+    .edu {
+      left: calc(1.5rem + var(--photo-w) + 1rem);
+    }
+
+    .edu__school {
+      font-size: var(--text-base);
+    }
+
+    .edu__program {
+      font-size: var(--text-xs);
+    }
+  }
+
+  @container (height < 23rem) {
+    .edu__school {
+      font-size: var(--text-base);
+    }
+
+    .edu__program {
+      font-size: var(--text-xs);
+    }
+
+    .edu__item {
+      padding-block: 0.45rem;
+    }
+
+    .edu__head {
+      margin-bottom: 0.15rem;
+      line-height: 1.05;
+    }
+  }
+
+  /* 英文校名與系所比中文長很多，矮格子時英文版先退一級；中文維持大字 */
+  @container (height < 23rem) {
+    :global(html[lang='en']) .edu__school {
+      font-size: var(--text-sm);
+    }
+
+    :global(html[lang='en']) .edu__program {
+      font-size: var(--text-xs);
+    }
+  }
+
+  @container (height < 21rem) {
+    .edu__school {
+      font-size: var(--text-base);
+    }
+
+    .edu__program {
+      font-size: var(--text-xs);
+    }
+
+    .edu__item {
+      gap: 0.15rem;
+      padding-block: 0.4rem;
+    }
+  }
+
+  .col--end {
+    width: calc(var(--u) * 0.9);
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--pad) 0;
+  }
+
+  .end__repo {
+    font-size: var(--text-xs);
+    color: var(--ink-muted);
+  }
 
   /* ==========================================================
-     自我介紹：不對稱縮排。張力來自縮排，不是居中。
+     自我介紹：名詞，不是句子；不對稱縮排
      ========================================================== */
-  /* 主動作推到格板底部：空間被刻意用掉，不是留著空白 */
-  .aboutstack {
+  .intro-stack {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -240,17 +513,71 @@ const photoAlt = en
     height: 100%;
   }
 
-  .intro {
+  /* ---- 名字組字 ----
+     極簡但不是隨便打一個字：一個字級極大的名字、
+     下面一行正式英文名、一條細線、綽號。
+     兩層字級對比非常大，留白與一個黃色幾何形負責其餘的事。 */
+  .mark {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    font-size: var(--text-display);
-    font-weight: 450;
-    letter-spacing: -0.028em;
-    line-height: 1.08;
   }
 
-  .intro__line[data-indent='true'] {
-    padding-left: 1.6em;
+  /* 黃色幾何圓（跟 rauno.me 那顆黃圓同一個手法）：
+     大到被格子邊緣切掉，名字壓在它上面。 */
+  .disc {
+    position: absolute;
+    right: -14%;
+    bottom: -22%;
+    width: 78%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background-color: var(--yellow);
+    pointer-events: none;
+    transition: transform calc(var(--clock-hover) * 1.6) var(--ease-spring);
+  }
+
+  :global(.panel:hover) .disc {
+    transform: translate(-3%, -3%) scale(1.04);
+  }
+
+  .mark__name {
+    font-size: clamp(3rem, 1.6rem + 5.4vw, 7rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    /* 光學修正：大字的左側筆畫看起來會比內距更往內，往左推一點對齊下面的小字 */
+    margin-left: -0.04em;
+  }
+
+  .mark__sub {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .mark__formal {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .mark__rule {
+    flex: 1;
+    max-width: 6rem;
+    height: 1px;
+    background-color: var(--edge-strong);
+  }
+
+  .mark__alias {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    white-space: nowrap;
   }
 
   .jump {
@@ -258,7 +585,7 @@ const photoAlt = en
     align-self: flex-start;
     align-items: center;
     gap: var(--space-2);
-    padding: 0.5rem 0.9rem 0.5rem 0.65rem;
+    padding: 0.55rem 0.7rem 0.55rem 0.95rem;
     border: var(--hairline) solid var(--edge-strong);
     font-size: var(--text-sm);
     font-weight: 500;
@@ -286,19 +613,34 @@ const photoAlt = en
   }
 
   .jump:hover .jump__arrow {
-    transform: translateY(2px);
+    transform: translateX(3px);
   }
 
   /* ==========================================================
      格內共用排版
      ========================================================== */
+  /* 中文標題只在空白處換行，不把「智慧」拆成兩行 */
   .h {
     font-size: var(--text-xl);
     margin-bottom: var(--space-3);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 
-  .h--sm {
+  /* 研究方向：「語音辨識 ASR · 自然語言處理」放同一行 */
+  .h--line {
     font-size: var(--text-lg);
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+
+  .fields--tight {
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .h--lg {
+    font-size: var(--text-2xl);
   }
 
   .body {
@@ -312,10 +654,17 @@ const photoAlt = en
 
   .fields {
     display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin: var(--space-5) 0 0;
+  }
+
+  /* 寬欄裡的欄位改成橫排，壓成一條 */
+  .fields--row {
+    flex-direction: row;
     flex-wrap: wrap;
-    gap: var(--space-3) var(--space-6);
-    margin: 0;
-    margin-top: var(--space-5);
+    gap: var(--space-3) var(--space-7);
+    margin-top: var(--space-4);
   }
 
   .fields__row {
@@ -336,49 +685,187 @@ const photoAlt = en
     font-size: var(--text-xs);
   }
 
-  .list {
-    display: grid;
+  /* ---- 閱讀紀錄 ---- */
+  /* 往下展開：閱讀紀錄格長高吃掉整欄，聯絡格縮到 0 並淡出；寬度不變 */
+  .col--reading > :global(.panel) {
+    transition:
+      flex-grow calc(var(--clock) * 1.3) var(--ease),
+      opacity var(--clock) var(--ease),
+      transform var(--clock-hover) var(--ease-spring),
+      box-shadow var(--clock-hover) var(--ease),
+      border-color var(--clock-hover) var(--ease);
+  }
+
+  :global(#reading-col[data-expanded='true'] > .panel:first-child) {
+    flex-grow: 30;
+  }
+
+  /* 聯絡格平常是 flex: 0 0 auto（Panel 的 inline style），展開時要用 !important 才壓得到 0 */
+  :global(#reading-col[data-expanded='true'] > .panel:last-child) {
+    flex: 0 0 0px !important;
+    min-height: 0;
+    opacity: 0;
+    border-width: 0;
+    pointer-events: none;
+  }
+
+  :global(#reading-col > .panel:first-child .panel__body) {
+    overflow: hidden;
+  }
+
+  .reading__toggle {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .reading__toggle:disabled {
+    cursor: default;
+  }
+
+  .reading__toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .reading__titlerow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+
+  .reading__title {
+    margin-bottom: 0;
+  }
+
+  .reading__count {
+    display: inline-flex;
+    align-items: baseline;
     gap: var(--space-2);
-    margin-top: var(--space-3);
+  }
+
+  .reading__hint {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .reading__hint-close,
+  .col--reading[data-expanded='true'] .reading__hint-open {
+    display: none;
+  }
+
+  .col--reading[data-expanded='true'] .reading__hint-close {
+    display: inline;
+  }
+
+  .stats__num {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- 收合：清單照樣列出，每篇標題一行，放不下的部分淡出，最下面一個「⋯」提示還有 ---- */
+  .readingstack {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .readingstack .list {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .col--reading[data-expanded='false'] .list {
+    overflow: hidden;
+  }
+
+  .col--reading[data-expanded='false'] .list__item {
+    padding-block: 0.45rem;
+  }
+
+  .col--reading[data-expanded='false'] .list__item a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .col--reading[data-expanded='false'] .list__meta {
+    display: none;
+  }
+
+  /* 有內容被截掉時：清單底部淡出 + 顯示「⋯」 */
+  .col--reading[data-more='true'][data-expanded='false'] .list {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
+  }
+
+  .reading__more {
+    display: none;
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted);
+  }
+
+  .col--reading[data-more='true'][data-expanded='false'] .reading__more {
+    display: block;
+  }
+
+  /* 展開：清單在格內上下捲 */
+  .col--reading[data-expanded='true'] .list {
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .list {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
   }
 
   .list__item {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.3rem;
+    padding-block: var(--space-3);
+    border-top: var(--hairline) solid var(--edge);
     font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1.4;
   }
 
   .list__meta {
     font-size: var(--text-2xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.02em;
     color: var(--ink-muted);
   }
 
+  /* 聯絡：一行一項，標籤在左、值在右 */
   .links {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
-    gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
     margin-top: var(--space-5);
   }
 
-  /* 飽和色格裡的文字與線要換成 on-accent 推出的值，否則深灰字在藍底上讀不到。
-     用 :global 指定祖先，因為 data-accent 在 Panel 渲染的元素上，拿不到 Home 的作用域。 */
-  :global(.panel[data-accent='true']) .body,
-  :global(.panel[data-accent='true']) .tag {
-    color: color-mix(in oklab, var(--on-accent) 84%, transparent);
-  }
-
-  :global(.panel[data-accent='true']) .links__row {
-    border-top-color: color-mix(in oklab, var(--on-accent) 32%, transparent);
-  }
-
   .links__row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    padding-top: var(--space-2);
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-block: 0.55rem;
     border-top: var(--hairline) solid var(--edge);
     min-width: 0;
   }
@@ -389,37 +876,263 @@ const photoAlt = en
     overflow-wrap: anywhere;
   }
 
-  /* ==========================================================
-     頁腳
-     ========================================================== */
-  .foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-5);
-    width: 100%;
-    max-width: var(--page-max);
-    margin-inline: auto;
-    padding: var(--space-5) var(--gutter) var(--space-7);
+  /* ---- 進度：一行一件事，狀態在左、內容在右 ---- */
+  .progress {
+    margin-top: var(--space-5);
   }
 
-  .foot__note,
-  .foot__repo {
+  .progress__head {
+    margin-bottom: var(--space-2);
+  }
+
+  .progress__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .progress__item {
+    display: grid;
+    grid-template-columns: 4.25rem 1fr;
+    gap: var(--space-3);
+    align-items: baseline;
+    padding-block: 0.4rem;
+    border-top: var(--hairline) solid color-mix(in oklab, currentColor 22%, transparent);
     font-size: var(--text-xs);
+    line-height: 1.4;
+  }
+
+  .progress__state {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.72;
+  }
+
+  /* 進行中那一行最亮，接下來的最淡 */
+  .progress__item[data-state='now'] .progress__state {
+    opacity: 1;
+  }
+
+  .progress__item[data-state='next'] {
+    opacity: 0.72;
+  }
+
+  /* 藍色格裡的次要文字與線（data-accent 在 Panel 渲染的元素上，所以用 :global 指定祖先） */
+  :global(.panel[data-accent='true']) .body,
+  :global(.panel[data-accent='true']) .tag {
+    color: color-mix(in oklab, var(--on-accent) 84%, transparent);
+  }
+
+  :global(.panel[data-accent='true']) .links__row {
+    border-top-color: color-mix(in oklab, var(--on-accent) 32%, transparent);
+  }
+
+  :global(.panel[data-closed='true']) .h,
+  :global(.panel[data-closed='true']) .fields__val {
     color: var(--ink-muted);
   }
 
-  .foot__repo {
-    letter-spacing: 0.02em;
-  }
-
   /* ==========================================================
-     窄螢幕：格盤塌成較少的欄，但格子大小差異保留
+     窄螢幕：每欄接近一個螢幕寬，左右滑動一欄一欄看
      ========================================================== */
-  @media (width <= 52rem) {
-    .intro__line[data-indent='true'] {
-      padding-left: 1.1em;
+  /* 一欄一欄吸附只給觸控裝置；用滑鼠的窄視窗若也吸附，滾輪又會滾不動 */
+  @media (width <= 52rem) and (pointer: coarse) {
+    .track {
+      scroll-snap-type: x mandatory;
     }
   }
+
+  @media (width <= 52rem) {
+    /* 手機螢幕矮，空白縮小，內容才放得下 */
+    .track {
+      padding-block: calc((100dvh - var(--bar-h)) * 0.06);
+    }
+
+    .col--intro,
+    .col--photo,
+    .col--primary,
+    .col--work,
+    .col--reading,
+    .col--contact {
+      width: 86vw;
+    }
+
+    .col--end {
+      width: 50vw;
+    }
+
+
+  }
 </style>
+
+<script>
+  // 滑鼠滾輪捲動頁面：滾輪的上下轉成左右，整頁任何位置（包括頂部列）都有效。
+  // 用目標值加 rAF 補間，讓一格一格的滾輪變成平滑移動而不是一跳一跳。
+  const track = document.getElementById('track');
+
+  if (track) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let target = track.scrollLeft;
+    let raf = 0;
+
+    const maxLeft = () => track.scrollWidth - track.clientWidth;
+
+    const step = () => {
+      const diff = target - track.scrollLeft;
+      if (Math.abs(diff) < 0.5) {
+        track.scrollLeft = target;
+        raf = 0;
+        return;
+      }
+      track.scrollLeft += diff * 0.18;
+      raf = requestAnimationFrame(step);
+    };
+
+    // 全部格子一起縮放：scrollLeft 在 0 時最大，往右捲動「第一格寬度」的距離內線性降到 REST_ZOOM。
+    // 最大值通常是 1.2，但矮螢幕上下留白不夠時會自動縮小，避免被切掉。
+    const introCol = document.getElementById('intro-col');
+    const zoomEnabled = window.matchMedia('(pointer: fine) and (min-width: 52.01rem)');
+    /** 往右捲動後的大小（使用者要求：原本大小的 85%） */
+    const REST_ZOOM = 0.85;
+    /** 縮小速度倍率（1 = 捲完一個第一格寬度才縮完；1.25 = 快 1.25 倍） */
+    const SHRINK_SPEED = 1.25;
+    const updateZoom = () => {
+      if (reduce || !zoomEnabled.matches || !introCol) {
+        track.style.setProperty('--track-zoom', '1');
+        return;
+      }
+      const current = parseFloat(track.style.getPropertyValue('--track-zoom')) || 1;
+      const cs = getComputedStyle(track);
+      const inner = track.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const room = track.clientHeight - 8; // 上下各留一點，hover 放大時才不會碰到邊
+      const maxZoom = Math.max(1, Math.min(1.2, room / Math.max(inner, 1)));
+      // 縮放的距離以「第一格原本的寬度」為準（目前寬度 ÷ 目前倍率）
+      // 使用者要求縮小速度快約 1.25 倍：縮小所需的捲動距離除以 SHRINK_SPEED
+      const range = introCol.getBoundingClientRect().width / current / SHRINK_SPEED;
+      const progress = Math.min(Math.max(track.scrollLeft / Math.max(range, 1), 0), 1);
+      const zoom = maxZoom - (maxZoom - REST_ZOOM) * progress;
+      if (Math.abs(zoom - current) > 0.0005) track.style.setProperty('--track-zoom', zoom.toFixed(4));
+    };
+    track.addEventListener('scroll', updateZoom, { passive: true });
+    window.addEventListener('resize', updateZoom);
+    zoomEnabled.addEventListener('change', updateZoom);
+    updateZoom();
+
+    // 給頂部波形捲動軸用：拖曳時也走同一套平滑補間，才會順順地跟著動
+    (window as unknown as { trackGlide: (left: number) => void }).trackGlide = (left: number) => {
+      target = Math.min(Math.max(left, 0), maxLeft());
+      if (reduce) track.scrollLeft = target;
+      else if (!raf) raf = requestAnimationFrame(step);
+    };
+
+    // 觸控滑動、鍵盤等其他方式移動時，同步目標值
+    track.addEventListener(
+      'scroll',
+      () => {
+        if (!raf) target = track.scrollLeft;
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.ctrlKey) return; // 保留觸控板縮放
+        // 本來就是橫向手勢（觸控板左右滑）就交給瀏覽器
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+        // 格子內容自己還能上下捲的話，先讓它捲
+        const inner = (e.target as HTMLElement).closest?.('.panel__body') as HTMLElement | null;
+        if (inner && inner.scrollHeight > inner.clientHeight + 1) {
+          const atTop = inner.scrollTop <= 0 && e.deltaY < 0;
+          const atBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 1 && e.deltaY > 0;
+          if (!atTop && !atBottom) return;
+        }
+
+        e.preventDefault();
+        // deltaMode 1 是「行」而不是像素（部分滑鼠與 Firefox）
+        const delta = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+        target = Math.min(Math.max(target + delta, 0), maxLeft());
+
+        if (reduce) {
+          track.scrollLeft = target;
+        } else if (!raf) {
+          raf = requestAnimationFrame(step);
+        }
+      },
+      { passive: false }
+    );
+
+    // 鍵盤：方向鍵、PageUp/PageDown、Home/End 也能左右移動
+    window.addEventListener('keydown', (e) => {
+      const el = e.target as HTMLElement;
+      if (el.closest('input, textarea, [contenteditable], .scrub')) return;
+      const page = track.clientWidth * 0.8;
+      const map: Record<string, number> = {
+        ArrowRight: 120,
+        ArrowDown: 120,
+        ArrowLeft: -120,
+        ArrowUp: -120,
+        PageDown: page,
+        ' ': page,
+        PageUp: -page,
+      };
+      if (e.key === 'Home') target = 0;
+      else if (e.key === 'End') target = maxLeft();
+      else if (e.key in map) target = Math.min(Math.max(target + map[e.key], 0), maxLeft());
+      else return;
+      e.preventDefault();
+      if (reduce) track.scrollLeft = target;
+      else if (!raf) raf = requestAnimationFrame(step);
+    });
+
+    // 閱讀紀錄：點這一格（不是點論文連結）才展開／收合
+    const readingCol = document.getElementById('reading-col');
+    const readingBtn = readingCol?.querySelector<HTMLButtonElement>('.reading__toggle');
+    if (readingCol && readingBtn && !readingBtn.disabled) {
+      const setOpen = (open: boolean) => {
+        readingCol.dataset.expanded = String(open);
+        readingBtn.setAttribute('aria-expanded', String(open));
+        // 展開動畫結束後再判斷一次
+        window.setTimeout(checkMore, 700);
+        checkMore();
+      };
+      const readingPanel = readingCol.querySelector<HTMLElement>('.panel');
+      const list = readingCol.querySelector<HTMLElement>('.list');
+      const checkMore = () => {
+        if (!list) return;
+        const hidden = readingCol.dataset.expanded !== 'true' && list.scrollHeight > list.clientHeight + 1;
+        readingCol.dataset.more = String(hidden);
+      };
+      checkMore();
+      window.addEventListener('resize', checkMore);
+      new ResizeObserver(checkMore).observe(readingCol);
+      readingPanel?.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        setOpen(readingCol.dataset.expanded !== 'true');
+      });
+      readingCol.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && readingCol.dataset.expanded === 'true') {
+          setOpen(false);
+          readingBtn.focus();
+        }
+      });
+      if (readingPanel) readingPanel.style.cursor = 'pointer';
+    }
+
+    // 「往右看進行中的工作」平滑捲到主要計畫
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#work"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const el = document.getElementById('work');
+        if (!el) return;
+        e.preventDefault();
+        const col = el.closest('.col') as HTMLElement | null;
+        const gutter = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        target = Math.min(Math.max((col ?? el).offsetLeft - gutter, 0), maxLeft());
+        if (reduce) track.scrollLeft = target;
+        else if (!raf) raf = requestAnimationFrame(step);
+      });
+    });
+  }
+</script>

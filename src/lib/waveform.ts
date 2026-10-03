@@ -109,7 +109,7 @@ function envelope(phase: number, kind: Segment['kind'], burst: boolean): number 
   return Math.min(rise, fall);
 }
 
-export function buildWaveform(segments: Segment[]): Waveform {
+export function buildWaveform(segments: Segment[], columnCount: number = COLUMNS): Waveform {
   const { w, h } = CANVAS;
   const duration = segments.reduce((max, s) => Math.max(max, s.end), 0);
   const total = Math.round(duration * SAMPLE_RATE);
@@ -163,8 +163,8 @@ export function buildWaveform(segments: Segment[]): Waveform {
 
   // 按欄取極值，這就是音訊編輯器畫波形的方式
   const columns: Column[] = [];
-  const perColumn = total / COLUMNS;
-  for (let c = 0; c < COLUMNS; c++) {
+  const perColumn = total / columnCount;
+  for (let c = 0; c < columnCount; c++) {
     const from = Math.floor(c * perColumn);
     const to = Math.min(Math.floor((c + 1) * perColumn), total);
     let min = 0;
@@ -178,7 +178,7 @@ export function buildWaveform(segments: Segment[]): Waveform {
     const minY = axisY - min * half * 0.94;
     const maxY = axisY - max * half * 0.94;
     columns.push({
-      x: round((c / COLUMNS) * w),
+      x: round((c / columnCount) * w),
       top: round(Math.min(maxY, axisY - 0.3)),
       bottom: round(Math.max(minY, axisY + 0.3)),
     });

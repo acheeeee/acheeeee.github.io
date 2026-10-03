@@ -1,9 +1,9 @@
 ---
 /**
- * 照片。
+ * 照片：白底格子填滿欄位空間，照片依原圖比例（778×1052）放在左邊，四周留白不貼邊。
+ * 右邊暫時留空（使用者要先看空間多大再決定放什麼）。不裁切、不拉伸、不能捲動。
  *
- * 原圖只有 778px 寬，所以顯示寬度上限鎖在 330px（2x 螢幕剛好打平）。
- * 不得插值放大 —— 見 PRODUCT.md 的解析度限制。
+ * 原圖只有 778px 寬，顯示寬度不得插值放大（見 PRODUCT.md）。
  */
 import { Image } from 'astro:assets';
 import portrait from '../assets/bedo-portrait.jpeg';
@@ -15,48 +15,39 @@ interface Props {
 const { alt } = Astro.props;
 ---
 
-<div class="shot">
+<div class="frame">
   <Image
-    class="shot__img"
+    class="photo"
     src={portrait}
     alt={alt}
-    widths={[195, 260, 330]}
-    sizes="(max-width: 52rem) 42vw, 330px"
+    widths={[195, 260, 330, 390]}
+    sizes="(max-width: 52rem) 60vw, 260px"
     loading="eager"
     fetchpriority="high"
   />
 </div>
 
 <style>
-  .shot {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    /* 固定比例裁切：原圖是 778×1052（3:4），直接放會把整列撐高，
-       讓隔壁的自我介紹格下半截空掉。 */
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    background-color: var(--panel-soft);
+  /* 格子內四周留白 1.5rem；照片以這塊區域為準，取「放得進去的最大原比例尺寸」，靠左上。
+     原圖 778×1052，高 ÷ 寬 = 1.352。用容器查詢算確定寬高，比例不會跑掉。 */
+  .frame {
+    position: absolute;
+    inset: 1.5rem;
   }
 
-  @media (width <= 52rem) {
-    .shot {
-      aspect-ratio: 4 / 5;
-    }
-  }
-
-  .shot__img {
-    width: 100%;
-    height: 100%;
-    /* 原圖 778×1052；格板比例不同時以頂部為準，臉不會被切掉 */
+  /* --photo-w 由外層容器（Home.astro 的 .photocell）定義，照片與旁邊的教育背景共用同一條公式。
+     沒有外層定義時退回：以格子內高度為準。 */
+  .photo {
+    display: block;
+    width: var(--photo-w, auto);
+    height: calc(var(--photo-w, 0px) * 1.352);
+    max-width: none;
     object-fit: cover;
-    object-position: 50% 16%;
-    /* 不做灰階。原本想讓照片不跟電藍搶，但灰階人像讀起來像遺照，那比搶戲糟得多。 */
     transition: transform var(--clock) var(--ease);
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .shot:hover .shot__img {
+    :global(.panel:hover) .photo {
       transform: scale(1.015);
     }
   }

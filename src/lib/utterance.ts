@@ -152,3 +152,16 @@ export const UTTERANCE_EN: Segment[] = [
     amp: 0.9,
   },
 ];
+
+/**
+ * 「LI BE DO」· [li bi doʊ]
+ * 頂部捲動軸用的波形。中英文版共用這一個。
+ */
+export const UTTERANCE_LIBEDO: Segment[] = [
+  { ipa: 'l', start: 0, end: 0.06, kind: 'voiced', f0: [118, 112], formants: [[350, 320], [1100, 1800], [2600, 2800], [3400, 3420]], amp: 0.55 },
+  { ipa: 'i', start: 0.06, end: 0.24, kind: 'voiced', f0: [112, 120, 116], formants: [[300, 292], [2250, 2320], [2950, 3040], [3600, 3650]], amp: 0.92 },
+  { ipa: 'b', start: 0.24, end: 0.3, kind: 'noise', noise: [300, 3000], burst: true, amp: 0.34 },
+  { ipa: 'i', start: 0.3, end: 0.5, kind: 'voiced', f0: [130, 138, 128], formants: [[310, 300], [2200, 2300], [2900, 3000], [3550, 3600]], amp: 1 },
+  { ipa: 'd', start: 0.5, end: 0.56, kind: 'noise', noise: [1500, 5200], burst: true, amp: 0.36 },
+  { ipa: 'oʊ', start: 0.56, end: 0.86, kind: 'voiced', f0: [124, 110, 96], formants: [[500, 440, 392], [920, 850, 782], [2500, 2460, 2450], [3300, 3300, 3300]], amp: 0.88 },
+];

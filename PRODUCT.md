@@ -67,7 +67,9 @@ web
 
 ## Brand Commitments
 
-- 本名：李嘉峻。對外慣用綽號：比都 / BEDO。
+- 本名：李嘉峻。正式英文名：**LI, CHIA-CHUN**（使用者確認）。對外慣用綽號：比都 / BEDO。
+- 教育背景（使用者 2026-10-03 提供）：碩士 國立臺灣科技大學 資訊工程研究所（就讀中）；學士 國立中興大學 應用數學系；高中 臺北市立松山高級中學。**年份尚未提供，不要自己補。**
+- 所屬實驗室：臺灣科技大學 自然語言處理實驗室，`https://nlp.csie.ntust.edu.tw/`（名稱取自該網站標題）。
 - 網域：`acheeeee.github.io`（GitHub 帳號 `acheeeee`）。
 - 沒有 logo、沒有既定品牌色或字體規範。
 - 現有 favicon 仍是 Astro 預設圖示，屬於待替換的佔位資產，不是品牌承諾。
@@ -80,11 +82,15 @@ web
   Jhih-Rong Guo, Bi-Cheng Yan, Tien-Hong Lo, Berlin Chen（National Taiwan Normal University），
   *COALA: Robust Contextualized Speech-augmented Language Modeling for ASR via Contrastive Regularizer and Biasing Score Estimation*，
   arXiv:2607.08117 — ASR contextual biasing。
+  進度（使用者 2026-10-03 回報）：資料層完成（LibriSpeech 訓練集 961 小時、稀有詞抽取對官方參考檔 2620/2620 一致、重現 Figure 1 分布、biasing list 產生器）；進行中 audio adapter + CTC 模組；之後兩階段訓練與 BTI／Recall／WER 評估。這些數字是使用者提供的事實，可以引用；**不得**推測或補上尚未產出的評估結果。
 - 一個即時系統（開發中；正式名稱與範圍未定）。
 
 **已完成**
 
-- 參加過一次黑客松，**未獲獎**。這點必須照實呈現，不得用模糊措辭讓它讀起來像得獎或入圍。
+- **2026 新北市 AI 智慧城市黑客松競賽**，未獲獎。使用者決定頁面上**不特別寫出**「未獲獎」；但仍**不得**用任何措辭讓它讀起來像得獎、入圍或獲獎。
+  作品：為新北市法制局做的訴願案 AI 輔助系統（進件 PDF 欄位擷取、法規推薦與新舊法時效提示、歷史相似案例比對、決定書草稿）。
+  技術：BM25（jieba）＋ Gemini embedding 混合檢索、Python／FastAPI、Vue 前端；引用法條一律取自知識庫原文。
+  Repo：`https://github.com/acheeeee/AI_hackathon_20260912`（內容依該 repo 的 `app/README.md` 與 `requirements.txt` 撰寫）。
 
 **資產**
 

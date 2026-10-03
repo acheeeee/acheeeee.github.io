@@ -1,25 +1,70 @@
 ---
 /**
- * 頂部索引列。
+ * 頂部列：LI BE DO 波形捲動軸 + 語言切換。
  *
- * 一排極小的刻度記號加語言切換。細節密度來自這種極小的單位，
- * 不是來自把每個區塊都塞滿。
+ * 波形就是整頁的縮圖捲動軸（rauno.me 頂部那排刻度的角色）。
+ * - 框起來的那段 = 目前在視窗裡的位置；框內墨線實心、框外淡。
+ * - 拖曳框、點擊波形、方向鍵都能移動頁面；拖曳時走首頁的平滑補間，所以是順順地跟著動。
+ * - 框的下方顯示框中心正落在哪個音節（LI / BE / DO），跟著框移動。
+ *
+ * 波形是用音韻模型合成的，不是真實錄音（見 PRODUCT.md）。
  */
 import { LOCALE_PATH, LOCALES, STRINGS, type Locale } from '../data/site';
+import { buildWaveform } from '../lib/waveform';
+import { UTTERANCE_LIBEDO } from '../lib/utterance';
 
 interface Props {
   locale: Locale;
   switchLabel: string;
+  scrubberLabel: string;
 }
 
-const { locale, switchLabel } = Astro.props;
-const ticks = Array.from({ length: 14 }, (_, i) => i);
+const { locale, switchLabel, scrubberLabel } = Astro.props;
+const w = buildWaveform(UTTERANCE_LIBEDO, 150);
+
+/** 音節與它們在波形上的時間範圍（取自 UTTERANCE_LIBEDO 的音段界線） */
+const syllables = [
+  { label: 'LI', start: 0, end: 0.24 },
+  { label: 'BE', start: 0.24, end: 0.5 },
+  { label: 'DO', start: 0.5, end: w.duration },
+].map((s) => ({ ...s, from: s.start / w.duration, to: s.end / w.duration }));
 ---
 
 <header class="bar">
-  <div class="bar__index" aria-hidden="true">
-    <span class="bar__box"></span>
-    {ticks.map((i) => <span class="bar__tick" data-major={i % 7 === 0 ? 'true' : undefined}></span>)}
+  <div class="scrubwrap">
+    <div
+      class="scrub"
+      role="scrollbar"
+      aria-orientation="horizontal"
+      aria-controls="track"
+      aria-label={scrubberLabel}
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      tabindex="0"
+      data-syllables={JSON.stringify(syllables.map(({ label, from, to }) => ({ label, from, to })))}
+    >
+      {
+        ['dim', 'lit'].map((layer) => (
+          <svg
+            class="scrub__wave"
+            data-layer={layer}
+            viewBox={`0 0 ${w.width} ${w.height}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {w.columns.map((c) => (
+              <line x1={c.x} x2={c.x} y1={c.top} y2={c.bottom} vector-effect="non-scaling-stroke" />
+            ))}
+          </svg>
+        ))
+      }
+      <span class="scrub__window" aria-hidden="true">
+        <span class="scrub__grip" data-side="l"></span>
+        <span class="scrub__grip" data-side="r"></span>
+      </span>
+    </div>
+    <span class="mono scrub__label" aria-hidden="true">LI</span>
   </div>
 
   <nav class="bar__lang" aria-label={switchLabel}>
@@ -44,39 +89,130 @@ const ticks = Array.from({ length: 14 }, (_, i) => i);
 <style>
   .bar {
     position: relative;
+    flex: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-4);
-    min-height: 2.75rem;
+    height: 5rem;
     padding-inline: var(--gutter);
   }
 
-  .bar__index {
-    display: flex;
-    align-items: center;
-    gap: 3px;
+  .scrubwrap {
+    --win-x: 0%;
+    --win-w: 30%;
+    position: relative;
+    width: clamp(240px, 36vw, 520px);
+    padding-bottom: 1.75rem;
   }
 
-  .bar__box {
-    width: 15px;
-    height: 9px;
-    border: var(--hairline) solid var(--ink-mark);
-    margin-right: 4px;
+  .scrub {
+    position: relative;
+    height: 30px;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
   }
 
-  .bar__tick {
-    width: 1px;
-    height: 9px;
-    background-color: var(--ink-mark);
+  .scrub:focus-visible {
+    outline-offset: 6px;
   }
 
-  .bar__tick[data-major='true'] {
-    height: 13px;
-    background-color: var(--ink-muted);
+  .scrub__wave {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
-  /* 語言切換靠右絕對定位，讓索引記號保持在視覺中心 */
+  .scrub__wave line {
+    stroke-width: 1.4;
+  }
+
+  .scrub__wave[data-layer='dim'] line {
+    stroke: var(--ink-mark);
+  }
+
+  /* 框內實心：上層裁切到框的範圍 */
+  .scrub__wave[data-layer='lit'] {
+    clip-path: inset(0 calc(100% - var(--win-x) - var(--win-w)) 0 var(--win-x));
+  }
+
+  .scrub__wave[data-layer='lit'] line {
+    stroke: var(--ink);
+  }
+
+  /* 框：2px 墨框、內側一道亮邊、極淡的底色與柔和陰影，兩側有握把 */
+  .scrub__window {
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    left: var(--win-x);
+    width: var(--win-w);
+    border: 2px solid var(--ink);
+    background-color: color-mix(in oklab, var(--panel) 35%, transparent);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--panel) 70%, transparent),
+      0 6px 14px -8px rgba(0, 0, 0, 0.35);
+    cursor: grab;
+    transition:
+      border-color var(--clock) var(--ease),
+      box-shadow var(--clock) var(--ease);
+  }
+
+  .scrub:hover .scrub__window {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--panel) 70%, transparent),
+      0 8px 18px -8px rgba(0, 0, 0, 0.42);
+  }
+
+  .scrub__grip {
+    position: absolute;
+    top: 50%;
+    width: 4px;
+    height: 12px;
+    translate: 0 -50%;
+    background-color: var(--ink);
+  }
+
+  .scrub__grip[data-side='l'] {
+    left: -3px;
+  }
+
+  .scrub__grip[data-side='r'] {
+    right: -3px;
+  }
+
+  .scrubwrap[data-dragging='true'] .scrub__window {
+    cursor: grabbing;
+    border-color: var(--accent);
+  }
+
+  .scrubwrap[data-dragging='true'] .scrub__grip {
+    background-color: var(--accent);
+  }
+
+  /* 框下方的音節：跟著框中心移動 */
+  /* 跟框保持一點距離（框下緣往下 6px 處開始，再空約 10px），不要貼在捲軸上 */
+  .scrub__label {
+    position: absolute;
+    bottom: 0;
+    line-height: 1;
+    left: calc(var(--win-x) + var(--win-w) / 2);
+    translate: -50% 0;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    padding-left: 0.18em;
+    color: var(--ink);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .scrubwrap[data-dragging='true'] .scrub__label {
+    color: var(--accent);
+  }
+
   .bar__lang {
     position: absolute;
     right: var(--gutter);
@@ -106,6 +242,13 @@ const ticks = Array.from({ length: 14 }, (_, i) => i);
     color: var(--on-accent);
     background-color: var(--accent);
   }
+
+  @media (width <= 52rem) {
+    .scrubwrap {
+      width: clamp(180px, 52vw, 300px);
+      margin-right: 4.5rem;
+    }
+  }
 </style>
 
 <script>
@@ -114,8 +257,98 @@ const ticks = Array.from({ length: 14 }, (_, i) => i);
       try {
         localStorage.setItem('bedo.lang', link.dataset.langChoice || '');
       } catch {
-        /* 無痕模式寫不進去就算了，導覽照走 */
+        /* 無痕模式寫不進去就算了 */
       }
     });
   });
+
+  type Syllable = { label: string; from: number; to: number };
+
+  const wrap = document.querySelector<HTMLElement>('.scrubwrap');
+  const scrub = document.querySelector<HTMLElement>('.scrub');
+  const label = document.querySelector<HTMLElement>('.scrub__label');
+  const track = document.getElementById('track');
+
+  if (wrap && scrub && label && track) {
+    let syllables: Syllable[] = [];
+    try {
+      syllables = JSON.parse(scrub.dataset.syllables || '[]');
+    } catch {
+      syllables = [];
+    }
+
+    // 首頁的平滑補間；拿不到就退回直接設定
+    const glide = (left: number) => {
+      const g = (window as unknown as { trackGlide?: (l: number) => void }).trackGlide;
+      if (g) g(left);
+      else track.scrollLeft = left;
+    };
+
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const ratio = Math.min(track.clientWidth / track.scrollWidth, 1);
+      const pos = max > 0 ? track.scrollLeft / max : 0;
+      const winW = ratio * 100;
+      const winX = pos * (100 - winW);
+      wrap.style.setProperty('--win-w', `${winW}%`);
+      wrap.style.setProperty('--win-x', `${winX}%`);
+      scrub.setAttribute('aria-valuenow', String(Math.round(pos * 100)));
+
+      // 框中心落在哪個音節
+      const center = (winX + winW / 2) / 100;
+      const hit = syllables.find((s) => center >= s.from && center < s.to) ?? syllables[syllables.length - 1];
+      if (hit && label.textContent !== hit.label) label.textContent = hit.label;
+    };
+
+    /** 指標位置 → 頁面目標位置（讓框的中心對準指標） */
+    const leftFor = (clientX: number) => {
+      const box = scrub.getBoundingClientRect();
+      const ratio = Math.min(track.clientWidth / track.scrollWidth, 1);
+      const center = (clientX - box.left) / box.width - ratio / 2;
+      const pos = Math.min(Math.max(center / (1 - ratio || 1), 0), 1);
+      return pos * (track.scrollWidth - track.clientWidth);
+    };
+
+    let dragging = false;
+    let grabOffset = 0;
+
+    scrub.addEventListener('pointerdown', (e) => {
+      const box = scrub.getBoundingClientRect();
+      const win = scrub.querySelector<HTMLElement>('.scrub__window')!.getBoundingClientRect();
+      dragging = true;
+      wrap.dataset.dragging = 'true';
+      scrub.setPointerCapture(e.pointerId);
+      // 按在框上：保持按下的相對位置，不會一按就跳；按在框外：框中心跳到指標
+      grabOffset = e.clientX >= win.left && e.clientX <= win.right ? e.clientX - (win.left + win.width / 2) : 0;
+      glide(leftFor(e.clientX - grabOffset));
+      void box;
+    });
+
+    scrub.addEventListener('pointermove', (e) => {
+      if (dragging) glide(leftFor(e.clientX - grabOffset));
+    });
+
+    const stop = () => {
+      dragging = false;
+      wrap.dataset.dragging = 'false';
+    };
+    scrub.addEventListener('pointerup', stop);
+    scrub.addEventListener('pointercancel', stop);
+
+    scrub.addEventListener('keydown', (e) => {
+      const step = track.clientWidth * 0.6;
+      let next: number | null = null;
+      if (e.key === 'ArrowRight') next = track.scrollLeft + step;
+      else if (e.key === 'ArrowLeft') next = track.scrollLeft - step;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = track.scrollWidth;
+      if (next === null) return;
+      e.preventDefault();
+      glide(next);
+    });
+
+    track.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+  }
 </script>

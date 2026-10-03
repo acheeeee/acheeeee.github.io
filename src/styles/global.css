@@ -29,6 +29,8 @@
   --accent: #1b23ff; /* 7.7:1 against white */
   --accent-deep: #1219c7;
   --on-accent: #ffffff;
+  /* 第一格的黃色幾何形：IKEA 那種黃。只用在第一格，不做文字底色以外的用途。 */
+  --yellow: #ffd816;
 
   /* ---- 字體 ---- */
   --font-sans: 'Geist', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
@@ -64,7 +66,10 @@
 
   /* ---- 動態：單一時鐘 ---- */
   --clock: 420ms;
+  --clock-hover: 360ms;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* 輕微過衝的彈性曲線：hover 放大時看起來靈活而不是僵硬 */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ==========================================================================
@@ -89,23 +94,16 @@ html {
   background-color: var(--ground);
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-  /* 捲動吸附：每一列格板會對齊到視窗頂端，不會停在兩列中間。
-     用 proximity 而不是 mandatory —— mandatory 在內容比視窗高時會把使用者困住。
-     同一列的格板 offsetTop 相同，所以吸附點自然合併成一個。 */
-  scroll-snap-type: y proximity;
-  scroll-padding-top: calc(var(--gap) + 0.5rem);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-    scroll-snap-type: none;
-  }
+  /* 頁面本身不捲動：內容在橫向軌道裡左右移動（見 Home.astro 的 .track） */
+  overflow-y: hidden;
 }
 
 body {
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background-color: var(--ground);
   color: var(--ink);
   font-family: var(--font-sans);
