@@ -85,8 +85,11 @@ const personJsonLd = {
     <meta property="og:locale" content={locale === 'en' ? 'en' : 'zh_Hant_TW'} />
     <meta name="twitter:card" content="summary" />
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.ico" />
+    {/* 分頁圖示：使用者提供的照片（src/assets/favicon-source.jpg，置中裁成正方形） */}
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     {
       preloads.map((file) => (

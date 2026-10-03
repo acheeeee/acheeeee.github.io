@@ -163,6 +163,21 @@ primary: false,
 
 ---
 
+### 4.6 換分頁圖示（favicon）
+
+原圖放在 `src/assets/favicon-source.jpg`（使用者提供，置中裁成正方形）。換圖時重新產生 `public/` 裡這四個檔案，`Base.astro` 的連結不用改：
+
+```bash
+sips -s format png src/assets/favicon-source.jpg --out /tmp/src.png
+sips -c 421 421 /tmp/src.png --out /tmp/square.png        # 421 = 原圖短邊，換圖要改
+sips -z 32 32   /tmp/square.png --out public/favicon-32.png
+sips -z 192 192 /tmp/square.png --out public/favicon-192.png
+sips -z 180 180 /tmp/square.png --out public/apple-touch-icon.png
+sips -z 48 48   /tmp/square.png --out /tmp/48.png && sips -s format ico /tmp/48.png --out public/favicon.ico
+```
+
+瀏覽器會快取分頁圖示，換完看不到新圖就清快取或開無痕視窗。
+
 ## 5. 踩過的坑
 
 - **Astro 樣式作用域**：在 `Home.astro` 寫的 class 樣式，套不到 `Panel.astro` 渲染出來的元素上（拿不到作用域 hash）。要跨元件指定祖先就用 `:global(.panel[data-accent='true']) .xxx`。格盤曾經因此整個垮成一條條窄柱。
