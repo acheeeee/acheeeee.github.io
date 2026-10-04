@@ -1,9 +1,9 @@
 ---
 /**
- * 照片：白底格子填滿欄位空間，照片依原圖比例（778×1052）放在左邊，四周留白不貼邊。
+ * 照片：白底格子填滿欄位空間，照片依原圖比例（786×983）放在左邊，四周留白不貼邊。
  * 右邊暫時留空（使用者要先看空間多大再決定放什麼）。不裁切、不拉伸、不能捲動。
  *
- * 原圖只有 778px 寬，顯示寬度不得插值放大（見 PRODUCT.md）。
+ * 原圖只有 786px 寬，顯示寬度不得插值放大（見 PRODUCT.md）。
  */
 import { Image } from 'astro:assets';
 import portrait from '../assets/bedo-portrait.jpeg';
@@ -20,8 +20,8 @@ const { alt } = Astro.props;
     class="photo"
     src={portrait}
     alt={alt}
-    widths={[195, 260, 330, 390]}
-    sizes="(max-width: 52rem) 60vw, 260px"
+    widths={[260, 390, 600, 786]}
+    sizes="(max-width: 52rem) 40vw, 300px"
     loading="eager"
     fetchpriority="high"
   />
@@ -29,7 +29,7 @@ const { alt } = Astro.props;
 
 <style>
   /* 格子內四周留白 1.5rem；照片以這塊區域為準，取「放得進去的最大原比例尺寸」，靠左上。
-     原圖 778×1052，高 ÷ 寬 = 1.352。用容器查詢算確定寬高，比例不會跑掉。 */
+     原圖 786×983，高 ÷ 寬 = 1.251。用容器查詢算確定寬高，比例不會跑掉。 */
   .frame {
     position: absolute;
     inset: 1.5rem;
@@ -40,7 +40,7 @@ const { alt } = Astro.props;
   .photo {
     display: block;
     width: var(--photo-w, auto);
-    height: calc(var(--photo-w, 0px) * 1.352);
+    height: calc(var(--photo-w, 0px) * 1.251);
     max-width: none;
     object-fit: cover;
     transition: transform var(--clock) var(--ease);

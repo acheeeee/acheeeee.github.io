@@ -49,8 +49,8 @@ const L = {
 
 
 const photoAlt = en
-  ? 'Portrait of LI, CHIA-CHUN (BEDO), head and shoulders, in a dark suit and tie.'
-  : '李嘉峻的個人照，正面齊肩，深色西裝與領帶。';
+  ? 'Mirror selfie of LI, CHIA-CHUN (BEDO) in a white linen shirt and grey pinstripe trousers.'
+  : '李嘉峻的鏡子自拍，白色亞麻襯衫、灰色細條紋西裝褲。';
 ---
 
 <TopBar locale={locale} switchLabel={t.langSwitchLabel} scrubberLabel={t.scrubberLabel} />
@@ -358,11 +358,11 @@ const photoAlt = en
     container-type: size;
   }
 
-  /* 照片寬（原圖比例 778×1052，以格子內高度為準）——照片與教育背景共用這一個值。
+  /* 照片寬（原圖比例 786×983，以格子內高度為準）——照片與教育背景共用這一個值。
      .frame 不是容器，所以照片裡的 cqw/cqh 也是相對 .photocell。 */
   :global(.photocell .frame),
   .edu {
-    --photo-w: min(100cqw - 3rem, (100cqh - 3rem) / 1.352);
+    --photo-w: min(100cqw - 3rem, (100cqh - 3rem) / 1.251);
   }
 
   /* 教育背景的左緣 = 留白 + 照片寬 + 間距 */
@@ -427,7 +427,7 @@ const photoAlt = en
   @container (aspect-ratio < 1.15) {
     :global(.photocell .frame),
     .edu {
-      --photo-w: min((100cqw - 3rem) * 0.42, (100cqh - 3rem) / 1.352);
+      --photo-w: min((100cqw - 3rem) * 0.42, (100cqh - 3rem) / 1.251);
     }
 
     .edu {
