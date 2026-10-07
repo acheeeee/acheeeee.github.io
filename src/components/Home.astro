@@ -990,15 +990,15 @@ const photoAlt = en
     };
 
     // 全部格子一起縮放：scrollLeft 在 0 時最大，往右捲動「第一格寬度」的距離內線性降到 REST_ZOOM。
-    // 最大值通常是 1.2，但矮螢幕上下留白不夠時會自動縮小，避免被切掉。
+    // 最大值通常是 1.2，但矮螢幕上下留白不夠、或手機左右放不下時會自動縮小，避免被切掉。
+    // 桌機與手機都有（使用者要求手機滑動也要縮放）；只有「減少動態」設定下關閉。
     const introCol = document.getElementById('intro-col');
-    const zoomEnabled = window.matchMedia('(pointer: fine) and (min-width: 52.01rem)');
     /** 往右捲動後的大小（使用者要求：原本大小的 85%） */
     const REST_ZOOM = 0.85;
     /** 縮小速度倍率（1 = 捲完一個第一格寬度才縮完；1.25 = 快 1.25 倍） */
     const SHRINK_SPEED = 1.25;
     const updateZoom = () => {
-      if (reduce || !zoomEnabled.matches || !introCol) {
+      if (reduce || !introCol) {
         track.style.setProperty('--track-zoom', '1');
         return;
       }
@@ -1006,17 +1006,20 @@ const photoAlt = en
       const cs = getComputedStyle(track);
       const inner = track.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
       const room = track.clientHeight - 8; // 上下各留一點，hover 放大時才不會碰到邊
-      const maxZoom = Math.max(1, Math.min(1.2, room / Math.max(inner, 1)));
-      // 縮放的距離以「第一格原本的寬度」為準（目前寬度 ÷ 目前倍率）
+      // 第一格原本的寬度（目前寬度 ÷ 目前倍率）
+      const baseW = introCol.getBoundingClientRect().width / current;
+      // 左右上限：放大後第一格仍要完整放在螢幕內（手機的欄接近滿寬，這條才會起作用）
+      const roomW = track.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const maxZoom = Math.max(1, Math.min(1.2, room / Math.max(inner, 1), roomW / Math.max(baseW, 1)));
+      // 縮放的距離以「第一格原本的寬度」為準
       // 使用者要求縮小速度快約 1.25 倍：縮小所需的捲動距離除以 SHRINK_SPEED
-      const range = introCol.getBoundingClientRect().width / current / SHRINK_SPEED;
+      const range = baseW / SHRINK_SPEED;
       const progress = Math.min(Math.max(track.scrollLeft / Math.max(range, 1), 0), 1);
       const zoom = maxZoom - (maxZoom - REST_ZOOM) * progress;
       if (Math.abs(zoom - current) > 0.0005) track.style.setProperty('--track-zoom', zoom.toFixed(4));
     };
     track.addEventListener('scroll', updateZoom, { passive: true });
     window.addEventListener('resize', updateZoom);
-    zoomEnabled.addEventListener('change', updateZoom);
     updateZoom();
 
     // 給頂部波形捲動軸用：拖曳時也走同一套平滑補間，才會順順地跟著動
