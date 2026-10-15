@@ -19,10 +19,12 @@ interface Props {
   grow?: number;
   /** 較緊的內距，用在需要壓扁的格子 */
   compact?: boolean;
+  /** 空白補位格：沒有內容，只讓兩格一欄的欄底不凹一個洞。螢幕閱讀器略過，滑鼠移上去不放大。 */
+  filler?: boolean;
   id?: string;
 }
 
-const { accent = false, closed = false, bleed = false, grow = 1, compact = false, id } = Astro.props;
+const { accent = false, closed = false, bleed = false, grow = 1, compact = false, filler = false, id } = Astro.props;
 ---
 
 <section
@@ -32,6 +34,8 @@ const { accent = false, closed = false, bleed = false, grow = 1, compact = false
   data-closed={closed ? 'true' : undefined}
   data-bleed={bleed ? 'true' : undefined}
   data-compact={compact ? 'true' : undefined}
+  data-filler={filler ? 'true' : undefined}
+  aria-hidden={filler ? 'true' : undefined}
   style={grow === 0 ? 'flex: 0 0 auto' : `--grow:${grow}`}
 >
   <span class="panel__cross" data-at="tl" aria-hidden="true"></span>
@@ -71,6 +75,15 @@ const { accent = false, closed = false, bleed = false, grow = 1, compact = false
     .panel:hover {
       transform: scale(1.035);
     }
+  }
+
+  /* 空白格不是可以看的東西，不要像其他格一樣回應滑鼠 */
+  .panel[data-filler='true'],
+  .panel[data-filler='true']:hover {
+    z-index: auto;
+    border-color: var(--edge);
+    box-shadow: none;
+    transform: none;
   }
 
   .panel[data-accent='true'] {

@@ -92,6 +92,9 @@ web
   技術：BM25（jieba）＋ Gemini embedding 混合檢索、Python／FastAPI、Vue 前端；引用法條一律取自知識庫原文。
   Repo：`https://github.com/acheeeee/AI_hackathon_20260912`（內容依該 repo 的 `app/README.md` 與 `requirements.txt` 撰寫）。
 
+- **大學畢業論文**（使用者 2026-10-15 提供 LaTeX 原稿）：*Efficient 3-Day European Heatwave Forecasting using TSBPCA-optimized LSTM*，作者 LI CHIA-CHUN、PEI-CHEN LEE、CHUN-LIN CHENG。**沒有投稿**，不得寫成或暗示已發表（使用者要求格子上不標類型）。
+  內容：TSBPCA（時序串流批次 PCA）壓縮 ERA5 歐洲夏季氣象場（2000–2023）＋輕量 LSTM，提前三天預測熱浪。原稿數字：降維記憶體需求由標準 PCA 的 100 GB 以上降到 10 GB 以下；測試集 Recall 0.5312、Precision 0.2615。這些數字可以引用，**不得**改寫成更好看的版本。年份未提供，不要自己補。
+
 **資產**
 
 - 個人大頭照：`src/assets/bedo-portrait.jpeg`。786 × 983（約 4:5 直幅），109 KB（2026-10-04 換新）。鏡子自拍：白色亞麻襯衫、灰色細條紋西裝褲，米白牆面背景，頭部在畫面上緣，構圖到大腿。
@@ -100,7 +103,7 @@ web
 
 **目前沒有，未來工作不得編造**
 
-- 已發表論文、引用數、模型或系統的效能數字
+- 已發表論文（畢業論文不算，它沒有投稿）、引用數、模型或系統的效能數字
 - 客戶、合作單位、推薦語、案例研究
 - 獎項、媒體報導、演講紀錄
 - 任何流量或使用者規模數據

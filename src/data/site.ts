@@ -53,6 +53,8 @@ export interface WorkEntry {
   source: { label: string; href: string } | null;
   /** 時間欄位的文字，例如 '2026-02 起'。未定就設 null，欄位會收起來不留空槽。 */
   period: Record<Locale, string> | null;
+  /** 作者，照原文寫法；沒有就省略 */
+  authors?: string | null;
 }
 
 export interface ReadingEntry {
@@ -285,13 +287,44 @@ export const WORK: WorkEntry[] = [
     },
     period: null,
   },
+  {
+    // 來源：使用者 2026-10-15 提供的論文 LaTeX 原稿。大學畢業論文，沒有投稿——不得寫成或暗示已發表。
+    // 使用者要求不標類型。數字照原稿，不要改寫成更好看的。年份未提供，不要自己補。
+    id: 'heatwave-thesis',
+    status: 'closed',
+    primary: false,
+    authors: 'LI CHIA-CHUN, PEI-CHEN LEE, CHUN-LIN CHENG',
+    title: {
+      'zh-Hant': 'Efficient 3-Day European Heatwave Forecasting using TSBPCA-optimized LSTM',
+      en: 'Efficient 3-Day European Heatwave Forecasting using TSBPCA-optimized LSTM',
+    },
+    summary: {
+      'zh-Hant':
+        '熱浪預警要提前得夠早，也要能在一般硬體上跑。輸入是 ERA5 再分析資料中 2000–2023 年歐洲夏季的四個氣象場（2 公尺氣溫、表層土壤濕度、500 hPa 重力位高度、850 hPa 氣溫）。TSBPCA（時序串流批次 PCA）把約 11 萬維的網格資料壓成 8 個主成分，再由兩層輕量 LSTM 讀過去 10 天，提前三天判斷是否發生熱浪。TSBPCA 用串流 QR 分解逐批更新投影基底，不建完整的共變異數矩陣，記憶體需求從標準 PCA 的 100 GB 以上降到 10 GB 以下。評估以召回率優先：測試集 Recall 0.53、Precision 0.26。',
+      en:
+        'Heatwave warnings need enough lead time and have to run on ordinary hardware. The input is four ERA5 reanalysis fields over Europe for the 2000–2023 summers: 2 m temperature, top-layer soil moisture, 500 hPa geopotential and 850 hPa temperature. TSBPCA (temporal streaming batch PCA) compresses the roughly 113,000-dimensional grid to 8 components, and a two-layer lightweight LSTM reads the past 10 days to flag a heatwave three days ahead. TSBPCA updates its projection basis batch by batch with a streaming QR decomposition and never builds the full covariance matrix, cutting memory from over 100 GB with standard PCA to under 10 GB. Evaluation favours recall: 0.53 recall and 0.26 precision on the test set.',
+    },
+    source: null,
+    repo: null,
+    period: null,
+  },
 ];
 
 /**
  * 讀過的論文，最近讀的在前。陣列空的時候首頁會顯示誠實的空狀態。
- * 作者、出處、年份都要查證過再填（下面三篇已對照原文 PDF 與 Crossref）。
+ * 作者、出處、年份都要查證過再填（下面每篇都已對照原文、arXiv 摘要頁或 Crossref）。
  */
 export const READING: ReadingEntry[] = [
+  {
+    // 2026-10-16 加入；標題、作者、年份對照 arXiv 摘要頁（v1 2026-05-18，未標投稿出處）
+    id: 'tsai-ctc-word-spotting-2026',
+    title: 'Contextual Biasing for Streaming ASR via CTC-based Word Spotting',
+    authors: 'Tsai, Lo, Sun & Chen',
+    venue: 'arXiv',
+    year: '2026',
+    href: 'https://arxiv.org/abs/2605.18222',
+    state: 'read',
+  },
   {
     id: 'coala-2026',
     title: 'COALA: Robust Contextualized Speech-augmented Language Modeling for ASR via Contrastive Regularizer and Biasing Score Estimation',

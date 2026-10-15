@@ -26,12 +26,43 @@ const primary = WORK.filter((w) => w.status === 'active' && w.primary);
 const sideActive = WORK.filter((w) => w.status === 'active' && !w.primary);
 const closed = WORK.filter((w) => w.status === 'closed');
 
+/* 白色工作欄。每欄兩格（使用者指定）：
+   第一欄 = 其他進行中 + 最新一筆已完成；之後的已完成兩筆一欄，單數時補一格空白，欄底才不會凹一個洞。 */
+type WorkCell =
+  | { kind: 'side'; entry: (typeof WORK)[number]; grow: number }
+  | { kind: 'closed'; entry: (typeof WORK)[number]; grow: number }
+  | { kind: 'filler'; grow: number };
+
+const workCols: Array<{ cls: string; cells: WorkCell[] }> = [
+  {
+    cls: 'col--work',
+    cells: [
+      ...sideActive.map((entry) => ({ kind: 'side' as const, entry, grow: 0 })),
+      ...closed.slice(0, 1).map((entry) => ({ kind: 'closed' as const, entry, grow: 1.4 })),
+    ],
+  },
+];
+for (let i = 1; i < closed.length; i += 2) {
+  const pair = closed.slice(i, i + 2);
+  workCols.push({
+    cls: 'col--closed',
+    cells:
+      pair.length === 2
+        ? pair.map((entry) => ({ kind: 'closed' as const, entry, grow: 1 }))
+        : [
+            { kind: 'closed', entry: pair[0], grow: 0 },
+            { kind: 'filler', grow: 1 },
+          ],
+  });
+}
+
 const L = {
   affiliation: en ? 'affiliation' : '所屬',
   lab: en ? 'lab' : '實驗室',
   status: en ? 'status' : '狀態',
   source: en ? 'source' : '出處',
   repo: en ? 'code' : '程式碼',
+  authors: en ? 'authors' : '作者',
   entries: en ? 'entries' : '計數',
   total: en ? 'total' : '總計',
   read: en ? 'read' : '讀完',
@@ -82,7 +113,7 @@ const photoAlt = en
     </div>
 
     {/* ---- 欄 2：照片（白底填滿空間，照片依原比例靠左、右邊暫時留空）+ 研究方向（壓扁、貼齊欄底） ---- */}
-    <div class="col col--photo">
+    <div class="col col--photo" id="photo-col">
       <Panel bleed grow={1}>
         <div class="photocell">
           <PastedPhoto alt={photoAlt} />
@@ -129,7 +160,7 @@ const photoAlt = en
           <Panel accent id={i === 0 ? 'work' : undefined}>
             <h2 class="h h--lg">{entry.title[locale]}</h2>
             {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
-            <dl class="fields">
+            <dl class="fields fields--row">
               <div class="fields__row">
                 <dt class="tag">{L.status}</dt>
                 <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
@@ -163,45 +194,51 @@ const photoAlt = en
       ))
     }
 
-    {/* ---- 欄 4：其他進行中 + 已完成（白） ---- */}
-    <div class="col col--work">
-      {
-        sideActive.map((entry) => (
-          <Panel grow={0.58} id={primary.length === 0 ? 'work' : undefined}>
-            <h2 class="h">{entry.title[locale]}</h2>
-            {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
-            <dl class="fields">
-              <div class="fields__row">
-                <dt class="tag">{L.status}</dt>
-                <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
-              </div>
-            </dl>
-          </Panel>
-        ))
-      }
-      {
-        closed.map((entry) => (
-          <Panel closed grow={1.4}>
-            <h2 class="h">{entry.title[locale]}</h2>
-            {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
-            <dl class="fields">
-              <div class="fields__row">
-                <dt class="tag">{L.status}</dt>
-                <dd class="mono fields__val fields__val--mono">{t.statusLabel.closed}</dd>
-              </div>
-              {entry.repo && (
-                <div class="fields__row">
-                  <dt class="tag">{L.repo}</dt>
-                  <dd class="fields__val">
-                    <a href={entry.repo.href} rel="noopener noreferrer" target="_blank">{entry.repo.label}</a>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </Panel>
-        ))
-      }
-    </div>
+    {/* ---- 欄 4 起：其他進行中 + 已完成（白），每欄兩格，單數補空白格 ---- */}
+    {
+      workCols.map((col) => (
+        <div class={`col ${col.cls}`}>
+          {col.cells.map((cell, i) =>
+            cell.kind === 'filler' ? (
+              <Panel filler grow={cell.grow} />
+            ) : cell.kind === 'side' ? (
+              <Panel grow={cell.grow} id={primary.length === 0 && i === 0 ? 'work' : undefined}>
+                <h2 class="h">{cell.entry.title[locale]}</h2>
+                {cell.entry.summary[locale] && <p class="body body--sm">{cell.entry.summary[locale]}</p>}
+                <dl class="fields">
+                  <div class="fields__row">
+                    <dt class="tag">{L.status}</dt>
+                    <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
+                  </div>
+                </dl>
+              </Panel>
+            ) : (
+              <Panel closed grow={cell.grow}>
+                <h2 class="h">{cell.entry.title[locale]}</h2>
+                {cell.entry.summary[locale] && <p class="body body--sm">{cell.entry.summary[locale]}</p>}
+                {/* 不標「已完成」：灰底虛線框本身就說明了（使用者要求，寫出來代表設計失敗） */}
+                <dl class="fields">
+                  {cell.entry.authors && (
+                    <div class="fields__row">
+                      <dt class="tag">{L.authors}</dt>
+                      <dd class="fields__val">{cell.entry.authors}</dd>
+                    </div>
+                  )}
+                  {cell.entry.repo && (
+                    <div class="fields__row">
+                      <dt class="tag">{L.repo}</dt>
+                      <dd class="fields__val">
+                        <a href={cell.entry.repo.href} rel="noopener noreferrer" target="_blank">{cell.entry.repo.label}</a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </Panel>
+            )
+          )}
+        </div>
+      ))
+    }
 
     {/* ---- 欄 5：閱讀紀錄（上）+ 聯絡（下） ----
          閱讀紀錄收合時列出論文標題（每篇一行，放不下就淡出並顯示「⋯」）；點這一格才往下展開（蓋過下面的聯絡格，清單在格內上下捲），再點一次或按 Esc 收合。
@@ -302,12 +339,20 @@ const photoAlt = en
     /* 使用者要求：格子高度約為原本的 70%，上下各留 15% 空白。
        這段空白同時讓 hover 放大的格子不會被切掉。 */
     --bar-h: 5rem;
-    /* 上限：格子至少保留 36rem 高，矮螢幕（例如 1280×720 筆電）先保證內容放得下，再談留白 */
-    padding-block: clamp(
-      1rem,
+    /* 使用者要求格子在「整個視窗」上下置中，而且最左邊要能完整放大到 1.2 倍：
+       放大時格子上下各長 10%，上面那段留白（扣掉半個頂部列）必須裝得下這 10%。
+       一般螢幕用 15% 留白就夠；矮螢幕（例如 1280×720）改用第二項，格子會壓矮一點換回置中與放大（使用者選的）。 */
+    --pad-y: max(
       calc((100dvh - var(--bar-h)) * 0.15),
-      calc((100dvh - var(--bar-h) - 36rem) / 2)
+      calc(((100dvh - var(--bar-h)) * 0.1 + var(--bar-h) / 2 + 0.25rem) / 1.2),
+      /* 使用者要求方塊「矮胖、不要立著」：又高又窄的視窗裡，格子高度也受寬度限制——
+         第一格（黃金比例）放大 1.2 倍後仍要放得進螢幕寬，1.9416 = 1.618 × 1.2。多出的高度變成上下留白。 */
+      calc((100dvh - var(--bar-h) - (100vw - 2 * var(--gutter)) / 1.9416) / 2)
     );
+    /* 上面少半個頂部列、下面多半個，格子中心就在視窗中心，高度不變 */
+    --pad-top: calc(var(--pad-y) - var(--bar-h) / 2);
+    padding-top: var(--pad-top);
+    padding-bottom: calc(var(--pad-y) * 2 - var(--pad-top));
     padding-inline: var(--gutter);
     overflow-x: auto;
     overflow-y: hidden;
@@ -335,7 +380,12 @@ const photoAlt = en
     scroll-snap-align: start;
   }
 
-  .col--intro { width: calc(var(--u) * 2.6); }
+  /* 第一格是黃金比例（使用者要求）：高度照原本（欄高），寬 = 高 × φ。
+     用 aspect-ratio 讓寬度跟著高度走；窄視窗時不超過一個螢幕寬。 */
+  .col--intro {
+    aspect-ratio: 1.618 / 1;
+    max-width: calc(100vw - 2 * var(--gutter));
+  }
 
   /* 全部格子一起縮放：頁面在最左邊時所有欄放大（--track-zoom 最多 1.2），往右捲動時統一線性縮回 1。
      用 zoom 而不是 transform：zoom 會真的佔版面，格子之間不會互相蓋住。
@@ -346,9 +396,16 @@ const photoAlt = en
     /* zoom 底下百分比高度會被抵銷（量過：視覺高度不變），所以要自己乘回去，上下才會一起長大 */
     height: calc(100% * var(--track-zoom, 1));
   }
-  .col--photo { width: calc(var(--u) * 2.35); }
-  .col--primary { width: calc(var(--u) * 2.9); }
-  .col--work { width: calc(var(--u) * 2.65); }
+  /* 照片格是黃金比例（使用者要求）：寬 = 照片那格的高 × 1.618。
+     照片那格的高 = 欄高扣掉下面研究方向那格，那格的高度隨語言與換行變動，CSS 算不出來，
+     所以由下方腳本量過再設欄寬；這裡的 aspect-ratio 只是腳本跑之前的近似值，避免載入時跳動。 */
+  .col--photo {
+    aspect-ratio: 1.3 / 1;
+    max-width: calc(100vw - 2 * var(--gutter));
+  }
+  .col--primary { width: calc(var(--u) * 3.6); }
+  .col--work { width: calc(var(--u) * 3.1); }
+  .col--closed { width: calc(var(--u) * 2.6); }
   .col--reading { width: calc(var(--u) * 2.1); }
 
   /* ---- 照片格：照片靠左（尺寸由 PastedPhoto 依原圖比例算），學歷放進右邊留白 ---- */
@@ -878,7 +935,7 @@ const photoAlt = en
 
   /* ---- 進度：一行一件事，狀態在左、內容在右 ---- */
   .progress {
-    margin-top: var(--space-5);
+    margin-top: var(--space-4);
   }
 
   .progress__head {
@@ -896,7 +953,7 @@ const photoAlt = en
     grid-template-columns: 4.25rem 1fr;
     gap: var(--space-3);
     align-items: baseline;
-    padding-block: 0.4rem;
+    padding-block: 0.35rem;
     border-top: var(--hairline) solid color-mix(in oklab, currentColor 22%, transparent);
     font-size: var(--text-xs);
     line-height: 1.4;
@@ -949,10 +1006,15 @@ const photoAlt = en
       padding-block: calc((100dvh - var(--bar-h)) * 0.06);
     }
 
+    .col--intro {
+      aspect-ratio: auto;
+    }
+
     .col--intro,
     .col--photo,
     .col--primary,
     .col--work,
+    .col--closed,
     .col--reading,
     .col--contact {
       width: 86vw;
@@ -1005,7 +1067,8 @@ const photoAlt = en
       const current = parseFloat(track.style.getPropertyValue('--track-zoom')) || 1;
       const cs = getComputedStyle(track);
       const inner = track.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      const room = track.clientHeight - 8; // 上下各留一點，hover 放大時才不會碰到邊
+      // 格子往上下平均長大，所以可用空間看比較窄的那一邊（置中後上面的留白比下面少）
+      const room = inner + 2 * Math.min(parseFloat(cs.paddingTop), parseFloat(cs.paddingBottom)) - 8; // 留一點，hover 放大時才不會碰到邊
       // 第一格原本的寬度（目前寬度 ÷ 目前倍率）
       const baseW = introCol.getBoundingClientRect().width / current;
       // 左右上限：放大後第一格仍要完整放在螢幕內（手機的欄接近滿寬，這條才會起作用）
@@ -1021,6 +1084,39 @@ const photoAlt = en
     track.addEventListener('scroll', updateZoom, { passive: true });
     window.addEventListener('resize', updateZoom);
     updateZoom();
+
+    // 照片格黃金比例：量照片那格的實際高度，把欄寬設成高 × φ（說明見 .col--photo）。
+    // 用比例換算而不是直接寫像素，所以不受目前縮放倍率影響；縮放時寬高同比例變，不會反覆重設。手機不套用。
+    const photoCol = document.getElementById('photo-col');
+    const photoPanel = photoCol?.querySelector<HTMLElement>('.panel');
+    const narrow = window.matchMedia('(width <= 52rem)');
+    const PHI = 1.618;
+    const fitPhoto = () => {
+      if (!photoCol || !photoPanel) return;
+      if (narrow.matches) {
+        photoCol.style.removeProperty('width');
+        photoCol.style.removeProperty('aspect-ratio');
+        return;
+      }
+      // 改了欄寬，研究方向那格會重新換行、照片格的高跟著變，所以當場重量幾次直到穩定
+      for (let n = 0; n < 6; n++) {
+        const colW = photoCol.getBoundingClientRect().width;
+        const want = photoPanel.getBoundingClientRect().height * PHI;
+        if (colW === 0 || Math.abs(want - colW) < 0.5) return;
+        const cssW = parseFloat(getComputedStyle(photoCol).width);
+        photoCol.style.aspectRatio = 'auto';
+        photoCol.style.width = `${cssW * (want / colW)}px`;
+      }
+    };
+    if (photoCol && photoPanel) {
+      // 欄寬改變會讓研究方向那格換行、照片格的高跟著變，所以持續觀察直到穩定
+      new ResizeObserver(() => requestAnimationFrame(fitPhoto)).observe(photoPanel);
+      narrow.addEventListener('change', fitPhoto);
+      window.addEventListener('resize', fitPhoto);
+      // 字體載入後文字寬度會變，研究方向那格可能換行不同
+      document.fonts?.ready.then(fitPhoto);
+      fitPhoto();
+    }
 
     // 給頂部波形捲動軸用：拖曳時也走同一套平滑補間，才會順順地跟著動
     (window as unknown as { trackGlide: (left: number) => void }).trackGlide = (left: number) => {
