@@ -229,5 +229,4 @@ node scripts/shoot.mjs "http://localhost:4411/" .impeccable/review/mobile.png   
 | 「即時系統」沒有正式名稱與說明 | 待使用者提供 |
 | og:image | 沒有，分享連結只有文字卡 |
 | `LOCALE_PATH` 只處理首頁 | 加子頁時必須改 |
-| 畢業論文格：點了展開看論文內容（使用者 2026-10-15 提出，之後再做）。原稿暫放 `src/Efficient 3-Day European Heatwave Forecasting using TSBPCA-optimized LSTM/`，做完就刪 | 待做 |
 | 偵測器 `overused-font`（Geist） | 已知，字體尚未與使用者討論 |
