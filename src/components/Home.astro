@@ -12,6 +12,8 @@
 import TopBar from './TopBar.astro';
 import Panel from './Panel.astro';
 import PastedPhoto from './PastedPhoto.astro';
+import dog from '../assets/dog.png';
+import ball from '../assets/ball.png';
 import { CONTACT, EDUCATION, READING, STRINGS, WORK, type Locale } from '../data/site';
 
 interface Props {
@@ -200,7 +202,15 @@ const photoAlt = en
         <div class={`col ${col.cls}`}>
           {col.cells.map((cell, i) =>
             cell.kind === 'filler' ? (
-              <Panel filler grow={cell.grow} />
+              <Panel filler grow={cell.grow}>
+                {/* 像素黃金獵犬：原圖 src/assets/dog-source.png（使用者提供），去背並還原成 35×34 像素格。
+                    位置跟著這格在畫面上的位置反向移動，見下方腳本的 updateDogs。 */}
+                <div class="dogrun">
+                  <span class="dogrun__shadow"></span>
+                  <img class="dogrun__ball" src={ball.src} width={ball.width} height={ball.height} alt="" decoding="async" />
+                  <img class="dogrun__dog" src={dog.src} width={dog.width} height={dog.height} alt="" decoding="async" />
+                </div>
+              </Panel>
             ) : cell.kind === 'side' ? (
               <Panel grow={cell.grow} id={primary.length === 0 && i === 0 ? 'work' : undefined}>
                 <h2 class="h">{cell.entry.title[locale]}</h2>
@@ -990,6 +1000,58 @@ const photoAlt = en
     color: var(--ink-muted);
   }
 
+  /* ---- 空白格裡的像素黃金獵犬 ----
+     格子剛從右邊露出來時狗在最左邊，格子要從左邊離開時狗在最右邊（使用者指定，方向與捲動相反）。
+     --dog-p 由腳本依格子在畫面上的位置設定，0 = 最左、1 = 最右。 */
+  /* 狗是固定大小、站在格子底部；格子比狗矮時，超出格子的部分直接被裁掉（使用者要求，格子本身 overflow: hidden）。
+     狗前面有一顆黃球在彈，狗追著球跑但永遠追不到（使用者要求；黃色用第一格的 --yellow 呼應那顆大圓）。
+     狗從格子左邊外面跑進來、一路跑到從右邊出去（使用者要求跑快一點）：進度 0 時整隻狗在格子左緣外，
+     進度 1 時整隻狗已經出了右緣；球在前面，所以先進場也先出場。--edge 是 .dogrun 到格子邊緣的距離。
+     所有位移都以原圖的一個像素（--px）為單位，腳本只給整數，像素才不會糊。 */
+  .dogrun {
+    --dog-h: 8rem;
+    --px: calc(var(--dog-h) / 34);
+    --dog-w: calc(var(--dog-h) * 35 / 34);
+    --edge: 1.25rem;
+    --dog-x: calc(-1 * var(--edge) - var(--dog-w) + (100cqw + 2 * var(--edge) + var(--dog-w)) * var(--dog-p, 0));
+    position: absolute;
+    inset: 0 var(--edge) 1rem;
+    container-type: inline-size;
+    pointer-events: none;
+  }
+
+  .dogrun__dog {
+    position: absolute;
+    bottom: 0;
+    left: var(--dog-x);
+    width: auto;
+    height: var(--dog-h);
+    image-rendering: pixelated;
+    transform: translateY(calc(var(--dog-bob, 0) * var(--px) * -1));
+  }
+
+  .dogrun__ball {
+    position: absolute;
+    bottom: 0;
+    left: calc(var(--dog-x) + var(--dog-w) + var(--ball-lead, 2) * var(--px));
+    width: calc(8 * var(--px));
+    height: calc(8 * var(--px));
+    image-rendering: pixelated;
+    transform-origin: 50% 100%;
+    transform: translateY(calc(var(--ball-y, 0) * var(--px) * -1)) scale(var(--ball-sx, 1), var(--ball-sy, 1));
+  }
+
+  /* 球的影子：球越高影子越窄 */
+  .dogrun__shadow {
+    position: absolute;
+    bottom: calc(var(--px) * -0.5);
+    left: calc(var(--dog-x) + var(--dog-w) + (var(--ball-lead, 2) + 1) * var(--px));
+    width: calc(6 * var(--px));
+    height: var(--px);
+    background-color: color-mix(in oklab, var(--ink) 14%, transparent);
+    transform: scaleX(var(--shadow, 1));
+  }
+
   /* ==========================================================
      窄螢幕：每欄接近一個螢幕寬，左右滑動一欄一欄看
      ========================================================== */
@@ -1084,6 +1146,71 @@ const photoAlt = en
     track.addEventListener('scroll', updateZoom, { passive: true });
     window.addEventListener('resize', updateZoom);
     updateZoom();
+
+    // 空白格裡的狗：格子在畫面上越往左，狗在格子裡越往右（方向與捲動相反）。
+    // 進度 = 格子從右邊進場到從左邊離場走了多少：剛露出來 0、正要離開 1。
+    // 這格靠近軌道尾端，捲到底時還沒離開畫面，所以「離開」以捲到底和真的離開兩者先到的為準，狗才走得到最右邊。
+    // 狗在移動時一上一下（跑步），前面的球一下一下彈地；停下來後慢慢停住。
+    // 「減少動態」設定下狗停在中間、球靜止，都不動。
+    const dogs = [...document.querySelectorAll<HTMLElement>('.dogrun')];
+    const motion = new Map<HTMLElement, { p: number; dist: number; phase: number; ballPhase: number; run: number; bounce: number }>();
+    let motionRaf = 0;
+    let lastT = 0;
+    const stepMotion = (t: number) => {
+      const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+      lastT = t;
+      let alive = false;
+      for (const [run, m] of motion) {
+        const dogH = run.querySelector<HTMLElement>('.dogrun__dog')?.getBoundingClientRect().height || 1;
+        const speed = m.dist / Math.max(dt, 0.001) / dogH;      // 每秒跑幾個狗身高
+        m.run = Math.max(Math.min(speed / 3, 1), m.run - dt * 2.5);
+        m.bounce = Math.max(m.run, m.bounce - dt * 0.9);         // 球比狗晚一點停
+        m.phase += (m.dist / dogH) * Math.PI * 2.2;               // 跑的步伐跟著移動距離走
+        m.ballPhase += dt * Math.PI * 2 * 1.5 * (0.4 + 0.6 * m.bounce);
+        m.dist = 0;
+        const bob = Math.round(Math.abs(Math.sin(m.phase)) * 2 * Math.min(1, m.run * 3));
+        const h = Math.abs(Math.sin(m.ballPhase));
+        const ballY = Math.round(h * 9 * m.bounce);
+        const squash = m.bounce > 0.08 && ballY === 0;
+        run.style.setProperty('--dog-bob', String(bob));
+        run.style.setProperty('--ball-y', String(ballY));
+        run.style.setProperty('--ball-sx', squash ? '1.15' : '1');
+        run.style.setProperty('--ball-sy', squash ? '0.8' : '1');
+        run.style.setProperty('--ball-lead', String(2 + Math.round(4 * m.run)));   // 跑越快球滾越前面，永遠追不到
+        run.style.setProperty('--shadow', (1 - (ballY / 9) * 0.6).toFixed(2));
+        if (m.run > 0.005 || m.bounce > 0.005) alive = true;
+      }
+      motionRaf = alive ? requestAnimationFrame(stepMotion) : 0;
+      if (!alive) lastT = 0;
+    };
+    const updateDogs = () => {
+      for (const run of dogs) {
+        if (reduce) {
+          run.style.setProperty('--dog-p', '0.5');
+          continue;
+        }
+        const r = run.getBoundingClientRect();
+        const vw = document.documentElement.clientWidth;
+        const at = (left: number) => (vw - left) / (vw + r.width);
+        // 捲到底時這格的位置（格子往左移的距離 = 剩下還能捲的距離）
+        const end = Math.min(1, at(r.left - (maxLeft() - track.scrollLeft)));
+        // 狗在 92% 就要整隻跑出右緣：平滑捲動停下時常差一兩個像素到不了底，不留餘裕尾巴會卡在格子裡
+        const p = Math.min(Math.max(at(r.left) / Math.max(end, 0.01) / 0.92, 0), 1);
+        run.style.setProperty('--dog-p', p.toFixed(4));
+        const m = motion.get(run) ?? { p, dist: 0, phase: 0, ballPhase: 0, run: 0, bounce: 0 };
+        // 狗實際走的距離（畫面像素）：進度差 × 可移動的寬度（格子寬 + 一隻狗寬，從左外跑到右外）
+        const dogW = run.querySelector<HTMLElement>('.dogrun__dog')?.getBoundingClientRect().width || 0;
+        m.dist += Math.abs(p - m.p) * (r.width + dogW);
+        m.p = p;
+        motion.set(run, m);
+        if (m.dist > 0.5 && !motionRaf) motionRaf = requestAnimationFrame(stepMotion);
+      }
+    };
+    if (dogs.length) {
+      track.addEventListener('scroll', updateDogs, { passive: true });
+      window.addEventListener('resize', updateDogs);
+      updateDogs();
+    }
 
     // 照片格黃金比例：量照片那格的實際高度，把欄寬設成高 × φ（說明見 .col--photo）。
     // 用比例換算而不是直接寫像素，所以不受目前縮放倍率影響；縮放時寬高同比例變，不會反覆重設。手機不套用。
