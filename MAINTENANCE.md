@@ -95,6 +95,7 @@ src/
 ├─ assets/bedo-portrait.jpeg
 └─ assets/dog.png         ← 空白格的像素黃金獵犬（dog-source.png 是使用者給的原圖）
 scripts/shoot.mjs         ← 截圖與量測（見第 6 節）
+templates/project-update.md ← 新 project 的問卷（見 4.0）
 ```
 
 ---
@@ -102,6 +103,29 @@ scripts/shoot.mjs         ← 截圖與量測（見第 6 節）
 ## 4. 常見維護任務
 
 全部在 `src/data/site.ts`，**不用改 `.astro`**。
+
+### 4.0 用問卷更新（使用者的固定流程）
+
+使用者做了新東西時，會把 `templates/project-update.md` 丟給任一個模型，讓它一題一題問、填出最下面的「回傳格式」區塊，再把那個區塊貼回來。收到後照這張表改 `src/data/site.ts`：
+
+| 回傳欄位 | 對應 |
+|---|---|
+| 名稱_中／英 | `title` |
+| 說明_中／英 | `summary` |
+| 狀態 | `status`（進行中 `active`／已完成 `closed`） |
+| 主要計畫 | `primary`；是的話照「原主要計畫處理方式」改掉舊的那筆，**同時只能有一個 true** |
+| 進度、進度更新日期 | `progress.items`（完成 `done`／進行中 `now`／接下來 `next`）、`progress.asOf` |
+| 程式碼 | `repo` |
+| 出處 | `source`（重現他人論文時才放；自己的論文看情況放 `source`） |
+| 作者 | `authors` |
+| 期間 | `period` |
+| 閱讀紀錄 | `READING`，放在陣列最前面；作者、年份要自己再對照 arXiv／原文確認一次 |
+
+注意：
+
+- 回傳裡寫 `待提供` 的欄位，**不要自己補**，用 `null` 或留空字串，並在回覆裡列出還缺什麼。
+- 「可公開的數字」「投稿狀態」是給你判斷措辭用的：數字只能照寫，沒投稿的不能寫成發表，比賽沒得獎不提名次。也要同步記進 `PRODUCT.md` 的 Evidence 區。
+- 新增已完成的條目時，空白格那欄（兩格一欄、單數補空白格、裡面有狗）會自動重排，不用改 `.astro`；但改完一定要跑第 6 節的驗證，1280×720 英文版最容易被切。
 
 ### 4.1 新增一個專題 / side project
 
