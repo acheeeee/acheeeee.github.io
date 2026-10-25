@@ -82,8 +82,7 @@ web
   Jhih-Rong Guo, Bi-Cheng Yan, Tien-Hong Lo, Berlin Chen（National Taiwan Normal University），
   *COALA: Robust Contextualized Speech-augmented Language Modeling for ASR via Contrastive Regularizer and Biasing Score Estimation*，
   arXiv:2607.08117 — ASR contextual biasing。
-  進度（使用者 2026-10-18 更新）：資料層四項、audio adapter 與 CTC 模組（推定完成，待使用者確認）已完成；第二階段（prompt 組裝已完成，接著是前向計算與 KV cache、每句 120 個候選與 E⁺/E⁻ 遮罩的資料、訓練、四組 loss 對照實驗）在網站上合成一條、用頓號列出內容、標進行中（使用者要求）；資料層與前處理四項也合成一條；接下來是以 Recall／BTI／WER 評估（N = 500／1000／5000）。
-  舊紀錄（使用者 2026-10-03 回報）：資料層完成（LibriSpeech 訓練集 961 小時、稀有詞抽取對官方參考檔 2620/2620 一致、重現 Figure 1 分布、biasing list 產生器）；進行中 audio adapter + CTC 模組；之後兩階段訓練與 BTI／Recall／WER 評估。這些數字是使用者提供的事實，可以引用；**不得**推測或補上尚未產出的評估結果。
+  進度（使用者 2026-10-03 回報）：資料層完成（LibriSpeech 訓練集 961 小時、稀有詞抽取對官方參考檔 2620/2620 一致、重現 Figure 1 分布、biasing list 產生器）；進行中 audio adapter + CTC 模組；之後兩階段訓練與 BTI／Recall／WER 評估。這些數字是使用者提供的事實，可以引用；**不得**推測或補上尚未產出的評估結果。
 - 一個即時系統（開發中；正式名稱與範圍未定）。
 
 **已完成**
@@ -95,10 +94,6 @@ web
 
 - **大學畢業論文**（使用者 2026-10-15 提供 LaTeX 原稿）：*Efficient 3-Day European Heatwave Forecasting using TSBPCA-optimized LSTM*，作者 LI CHIA-CHUN、PEI-CHEN LEE、CHUN-LIN CHENG。**沒有投稿**，不得寫成或暗示已發表（使用者要求格子上不標類型）。
   內容：TSBPCA（時序串流批次 PCA）壓縮 ERA5 歐洲夏季氣象場（2000–2023）＋輕量 LSTM，提前三天預測熱浪。原稿數字：降維記憶體需求由標準 PCA 的 100 GB 以上降到 10 GB 以下；測試集 Recall 0.5312、Precision 0.2615。這些數字可以引用，**不得**改寫成更好看的版本。年份未提供，不要自己補。
-  展開後的詳細段落（引言、資料、方法、結果、結論）依同一份原稿整理，原稿裡另有：資料 2,206 天、149 天熱浪；d ≈ 113,364；K = 8、T = 30；兩層 LSTM、32 單元、Dropout 0.4、門檻 0.4；TP 17、FN 15、FP 48、TN 250、F1 0.3505；降維約 339 秒。
-
-- **Audio to Summarize**（使用者 2026-10-18 用問卷回傳）：在 Apple Silicon Mac 上本機批次轉錄課堂錄音的工具（MLX 執行 Cohere Transcribe 2B int8、依能量切段、用漢字比例判斷中英授課、轉台灣繁體、去除靜音段的重複輸出、輸出逐字稿與字幕再交給 LLM 整理重點）。Repo：`https://github.com/acheeeee/audio-to-summarize`（公開）。
-  可公開的數字**只有轉錄速度**：MacBook Pro（M5、32GB）上約 50 倍即時速度，17 段真實課堂錄音共 9 小時 54 分、純轉錄 12 分鐘（不含模型載入與音檔轉檔）。記憶體用量、錯誤率**不得**寫。課堂錄音與逐字稿**沒有公開**（含授課與實驗室會議內容），repo 只有程式和兩段合成語音範例，不得寫成有公開資料集。程式是在 Claude Code 協助下寫的。中文名稱未提供；期間待確認（回傳寫「2026-10 起」但狀態是已完成）。
 
 **資產**
 

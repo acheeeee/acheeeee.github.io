@@ -50,7 +50,7 @@ for (let i = 1; i < closed.length; i += 2) {
     cls: 'col--closed',
     cells:
       pair.length === 2
-        ? pair.map((entry) => ({ kind: 'closed' as const, entry, grow: entry.fit ? 0 : 1 })) // fit：貼合內容、完整顯示
+        ? pair.map((entry) => ({ kind: 'closed' as const, entry, grow: 1 }))
         : [
             { kind: 'closed', entry: pair[0], grow: 0 },
             { kind: 'filler', grow: 1 },
@@ -224,25 +224,8 @@ const photoAlt = en
               </Panel>
             ) : (
               <Panel closed grow={cell.grow}>
-                {/* 放不下的內容先淡出並顯示「⋯」，點這一格往下展開（同閱讀紀錄），見下方腳本的 fold */}
-                <div class="fold" data-more="false" data-fit={cell.entry.fit ? 'true' : undefined}>
-                <h2 class="h fold__title">
-                  <button class="fold__toggle" type="button" aria-expanded="false" aria-controls={`fold-${cell.entry.id}`} disabled>
-                    <span>{cell.entry.title[locale]}</span>
-                    <span class="mono fold__hint" aria-hidden="true">
-                      <span class="fold__hint-open">{L.expand} ↓</span>
-                      <span class="fold__hint-close">{L.collapse} ↑</span>
-                    </span>
-                  </button>
-                </h2>
-                <div class="fold__body" id={`fold-${cell.entry.id}`}>
+                <h2 class="h">{cell.entry.title[locale]}</h2>
                 {cell.entry.summary[locale] && <p class="body body--sm">{cell.entry.summary[locale]}</p>}
-                {cell.entry.details?.map((d) => (
-                  <section class="fold__section">
-                    <h3 class="fold__h">{d.heading[locale]}</h3>
-                    <p class="body body--sm">{d.body[locale]}</p>
-                  </section>
-                ))}
                 {/* 不標「已完成」：灰底虛線框本身就說明了（使用者要求，寫出來代表設計失敗） */}
                 <dl class="fields">
                   {cell.entry.authors && (
@@ -260,9 +243,6 @@ const photoAlt = en
                     </div>
                   )}
                 </dl>
-                </div>
-                <p class="mono fold__more" aria-hidden="true">⋯</p>
-                </div>
               </Panel>
             )
           )}
@@ -433,7 +413,7 @@ const photoAlt = en
     aspect-ratio: 1.3 / 1;
     max-width: calc(100vw - 2 * var(--gutter));
   }
-  .col--primary { width: calc(var(--u) * 4.2); }
+  .col--primary { width: calc(var(--u) * 3.6); }
   .col--work { width: calc(var(--u) * 3.1); }
   .col--closed { width: calc(var(--u) * 2.6); }
   .col--reading { width: calc(var(--u) * 2.1); }
@@ -978,16 +958,14 @@ const photoAlt = en
     list-style: none;
   }
 
-
   .progress__item {
     display: grid;
-    grid-template-columns: 3.5rem 1fr;
-    gap: var(--space-2);
+    grid-template-columns: 4.25rem 1fr;
+    gap: var(--space-3);
     align-items: baseline;
-    padding-block: 0.25rem;
+    padding-block: 0.35rem;
     border-top: var(--hairline) solid color-mix(in oklab, currentColor 22%, transparent);
-    /* 使用者要求：進度條目的字跟上面的描述一樣大（.body 是 --text-base） */
-    font-size: var(--text-base);
+    font-size: var(--text-xs);
     line-height: 1.4;
   }
 
@@ -1008,16 +986,9 @@ const photoAlt = en
   }
 
   /* 藍色格裡的次要文字與線（data-accent 在 Panel 渲染的元素上，所以用 :global 指定祖先） */
-  /* 進度條目的字跟描述同色（使用者要求：灰一點，不要純白） */
   :global(.panel[data-accent='true']) .body,
-  :global(.panel[data-accent='true']) .tag,
-  :global(.panel[data-accent='true']) .progress__item {
+  :global(.panel[data-accent='true']) .tag {
     color: color-mix(in oklab, var(--on-accent) 84%, transparent);
-  }
-
-  /* 進行中那一項亮一點，但比標題的純白暗（使用者要求） */
-  :global(.panel[data-accent='true']) .progress__item[data-state='now'] {
-    color: color-mix(in oklab, var(--on-accent) 93%, transparent);
   }
 
   :global(.panel[data-accent='true']) .links__row {
@@ -1027,139 +998,6 @@ const photoAlt = en
   :global(.panel[data-closed='true']) .h,
   :global(.panel[data-closed='true']) .fields__val {
     color: var(--ink-muted);
-  }
-
-  /* ---- 已完成的格子：放不下就收起來，點了往下展開（跟閱讀紀錄一樣） ----
-     收合時內容底部淡出、最下面一個「⋯」；點這一格，它長高吃掉整欄，同欄其他格縮到 0 並淡出。
-     內容放得下的格子不能點（按鈕 disabled、沒有提示）。滑鼠移上去只放大，不展開。 */
-  .col--work > :global(.panel),
-  .col--closed > :global(.panel) {
-    transition:
-      flex-grow calc(var(--clock) * 1.3) var(--ease),
-      opacity var(--clock) var(--ease),
-      transform var(--clock-hover) var(--ease-spring),
-      box-shadow var(--clock-hover) var(--ease),
-      border-color var(--clock-hover) var(--ease);
-  }
-
-  /* fit（完整顯示）的格子貼合內容；但空間真的不夠時可以被壓縮，這時它也會變成可以點開。
-     同欄的另一格至少留「標題 + 兩行」的高度，不會被擠到看不見。 */
-  :global(.panel:has(> .panel__body > .fold[data-fit='true'])) {
-    flex: 0 1 auto !important;
-  }
-
-  :global(.col:has(.fold[data-fit='true']) > .panel:not(:has(.fold[data-fit='true']))) {
-    min-height: 11rem;
-  }
-
-  /* 展開中的那一格（選擇器要比上面 fit 的那條更具體，展開時才蓋得過它） */
-  :global(.col[data-folding='true'] > .panel[data-open='true']) {
-    flex: 30 1 0px !important;
-  }
-
-  :global(.col[data-folding='true'] > .panel:not([data-open='true'])) {
-    flex: 0 0 0px !important;
-    min-height: 0 !important;
-    opacity: 0;
-    border-width: 0;
-    pointer-events: none;
-  }
-
-  .fold {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-  }
-
-  .fold__title {
-    flex: none;
-  }
-
-  .fold__toggle {
-    all: unset;
-    box-sizing: border-box;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-3);
-    width: 100%;
-    cursor: pointer;
-  }
-
-  .fold__toggle:disabled {
-    cursor: default;
-  }
-
-  .fold__toggle:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 4px;
-  }
-
-  .fold__hint {
-    display: none;
-    flex: none;
-    font-size: var(--text-2xs);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .fold[data-more='true'] .fold__hint,
-  :global(.panel[data-open='true']) .fold__hint {
-    display: inline;
-  }
-
-  .fold__hint-close,
-  :global(.panel[data-open='true']) .fold__hint-open {
-    display: none;
-  }
-
-  :global(.panel[data-open='true']) .fold__hint-close {
-    display: inline;
-  }
-
-  .fold__body {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .fold[data-more='true'] .fold__body {
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
-  }
-
-  :global(.panel[data-open='true']) .fold__body {
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-
-  /* 展開後的詳細段落（論文的引言、方法、結果、結論） */
-  .fold__section {
-    margin-top: var(--space-5);
-  }
-
-  .fold__h {
-    margin: 0 0 var(--space-2);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .fold__more {
-    display: none;
-    flex: none;
-    margin: 0;
-    font-size: var(--text-lg);
-    line-height: 1;
-    letter-spacing: 0.2em;
-    color: var(--ink-muted);
-  }
-
-  .fold[data-more='true'] .fold__more {
-    display: block;
   }
 
   /* ---- 空白格裡的像素黃金獵犬 ----
@@ -1508,42 +1346,6 @@ const photoAlt = en
       });
       if (readingPanel) readingPanel.style.cursor = 'pointer';
     }
-
-    // 已完成的格子：內容放不下時可以點開（往下展開、同欄其他格收起），再點一次或按 Esc 收合
-    document.querySelectorAll<HTMLElement>('.fold').forEach((fold) => {
-      const panel = fold.closest<HTMLElement>('.panel');
-      const col = panel?.parentElement;
-      const body = fold.querySelector<HTMLElement>('.fold__body');
-      const btn = fold.querySelector<HTMLButtonElement>('.fold__toggle');
-      if (!panel || !col || !body || !btn) return;
-      const check = () => {
-        const open = panel.dataset.open === 'true';
-        const more = !open && body.scrollHeight > body.clientHeight + 1;
-        fold.dataset.more = String(more);
-        btn.disabled = !(more || open);
-        panel.style.cursor = more || open ? 'pointer' : '';
-      };
-      const setOpen = (open: boolean) => {
-        panel.dataset.open = String(open);
-        col.dataset.folding = String(open);
-        btn.setAttribute('aria-expanded', String(open));
-        check();
-        window.setTimeout(check, 700); // 展開動畫結束後再量一次
-      };
-      check();
-      document.fonts?.ready.then(check);
-      new ResizeObserver(check).observe(panel);
-      panel.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a') || btn.disabled) return;
-        setOpen(panel.dataset.open !== 'true');
-      });
-      panel.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && panel.dataset.open === 'true') {
-          setOpen(false);
-          btn.focus({ preventScroll: true });
-        }
-      });
-    });
 
     // 「往右看進行中的工作」平滑捲到主要計畫
     document.querySelectorAll<HTMLAnchorElement>('a[href="#work"]').forEach((a) => {
