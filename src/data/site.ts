@@ -267,6 +267,32 @@ export const WORK: WorkEntry[] = [
     period: null,
   },
   {
+    // 來源：使用者 2026-10-18 用 templates/project-update.md 填好的回傳。
+    // 使用者只同意公開「轉錄速度」這個數字（含量測條件）；記憶體用量、錯誤率都不寫。
+    // 課堂錄音與逐字稿沒有公開，不得寫成有公開資料集。中文名稱未提供，先用英文原名。
+    // 期間回傳寫「2026-10 起」但狀態是已完成，待使用者確認，先不填。
+    // 2026-10-25 使用者指定：放在原本「即時系統」的位置（黑客松上面）。
+    id: 'audio-to-summarize',
+    status: 'closed',
+    primary: false,
+    title: {
+      'zh-Hant': 'Audio to Summarize',
+      en: 'Audio to Summarize',
+    },
+    summary: {
+      'zh-Hant':
+        '在 Apple Silicon Mac 上本機批次轉錄課堂錄音的工具，以 MLX 執行 Cohere Transcribe 2B（int8 量化），長音檔在能量最低處切成 35 秒以內的片段。模型本身沒有語言偵測，因此改用中文模式解碼每個檔案的幾段樣本，依漢字比例判斷是英文還是中文授課；中文課保留英文術語、轉為台灣繁體，並移除模型在靜音段產生的重複輸出。輸出附時間標記的逐字稿與字幕，再交給 LLM 整理重點。在 MacBook Pro（M5、32GB）上約 50 倍即時速度：17 段真實課堂錄音（英文與中文授課）共 9 小時 54 分，純轉錄耗時 12 分鐘（不含模型載入與音檔轉檔）。',
+      en:
+        'A tool for batch-transcribing lecture recordings locally on Apple Silicon Macs, running Cohere Transcribe 2B (int8) with MLX and splitting long audio into segments of at most 35 s at low-energy points. Because the model has no language identification, each file is classified as English or Mandarin by decoding a few samples in Mandarin mode and measuring the share of Han characters. Mandarin output keeps English technical terms, is converted to Taiwan Traditional Chinese, and has the repetition loops the model produces on silence removed. The result is a timestamped transcript and subtitle file per recording, ready to hand to an LLM for summarization. About 50× real time on a MacBook Pro (M5, 32 GB): 17 real lecture recordings (English- and Mandarin-taught) totaling 9 h 54 min were transcribed in 12 minutes of decoding time (excluding model loading and audio conversion).',
+    },
+    source: null,
+    repo: {
+      label: 'acheeeee/audio-to-summarize',
+      href: 'https://github.com/acheeeee/audio-to-summarize',
+    },
+    period: null,
+  },
+  {
     id: 'hackathon',
     status: 'closed',
     primary: false,

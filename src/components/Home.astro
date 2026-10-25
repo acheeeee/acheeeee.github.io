@@ -28,26 +28,17 @@ const primary = WORK.filter((w) => w.status === 'active' && w.primary);
 const sideActive = WORK.filter((w) => w.status === 'active' && !w.primary);
 const closed = WORK.filter((w) => w.status === 'closed');
 
-/* 白色工作欄。每欄兩格（使用者指定）：
-   第一欄 = 其他進行中 + 最新一筆已完成；之後的已完成兩筆一欄，單數時補一格空白，欄底才不會凹一個洞。 */
+/* 白色工作欄。每欄兩格（使用者指定）：已完成的兩筆一欄，單數時補一格空白（裡面有小狗），欄底才不會凹一個洞。
+   其他進行中的（例如即時系統）放在藍色主要計畫的下面（使用者 2026-10-25 指定）。 */
 type WorkCell =
-  | { kind: 'side'; entry: (typeof WORK)[number]; grow: number }
   | { kind: 'closed'; entry: (typeof WORK)[number]; grow: number }
   | { kind: 'filler'; grow: number };
 
-const workCols: Array<{ cls: string; cells: WorkCell[] }> = [
-  {
-    cls: 'col--work',
-    cells: [
-      ...sideActive.map((entry) => ({ kind: 'side' as const, entry, grow: 0 })),
-      ...closed.slice(0, 1).map((entry) => ({ kind: 'closed' as const, entry, grow: 1.4 })),
-    ],
-  },
-];
-for (let i = 1; i < closed.length; i += 2) {
+const workCols: Array<{ cls: string; cells: WorkCell[] }> = [];
+for (let i = 0; i < closed.length; i += 2) {
   const pair = closed.slice(i, i + 2);
   workCols.push({
-    cls: 'col--closed',
+    cls: i === 0 ? 'col--work' : 'col--closed',
     cells:
       pair.length === 2
         ? pair.map((entry) => ({ kind: 'closed' as const, entry, grow: 1 }))
@@ -155,46 +146,73 @@ const photoAlt = en
       </Panel>
     </div>
 
-    {/* ---- 欄 3：現在的主要計畫（藍） ---- */}
-    {
-      primary.map((entry, i) => (
-        <div class="col col--primary">
+    {/* ---- 欄 3：現在的主要計畫（藍，放不下就點開）+ 下面是其他進行中的（白，高度貼合內容） ---- */}
+    <div class="col col--primary">
+      {
+        primary.map((entry, i) => (
           <Panel accent id={i === 0 ? 'work' : undefined}>
-            <h2 class="h h--lg">{entry.title[locale]}</h2>
-            {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
-            <dl class="fields fields--row">
+            <div class="fold" data-more="false">
+              <h2 class="h h--lg fold__title">
+                <button class="fold__toggle" type="button" aria-expanded="false" aria-controls={`fold-${entry.id}`} disabled>
+                  <span>{entry.title[locale]}</span>
+                  <span class="mono fold__hint" aria-hidden="true">
+                    <span class="fold__hint-open">{L.expand} ↓</span>
+                    <span class="fold__hint-close">{L.collapse} ↑</span>
+                  </span>
+                </button>
+              </h2>
+              <div class="fold__body" id={`fold-${entry.id}`}>
+                {entry.summary[locale] && <p class="body">{entry.summary[locale]}</p>}
+                <dl class="fields fields--row">
+                  <div class="fields__row">
+                    <dt class="tag">{L.status}</dt>
+                    <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
+                  </div>
+                  {entry.source && (
+                    <div class="fields__row">
+                      <dt class="tag">{L.source}</dt>
+                      <dd class="fields__val">
+                        <a href={entry.source.href} rel="noopener noreferrer" target="_blank">{entry.source.label}</a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+                {entry.progress && (
+                  <div class="progress">
+                    <p class="tag progress__head">
+                      {L.progress} · <span class="mono">{entry.progress.asOf}</span>
+                    </p>
+                    <ol class="progress__list">
+                      {entry.progress.items.map((item) => (
+                        <li class="progress__item" data-state={item.state}>
+                          <span class="mono progress__state">{L.state[item.state]}</span>
+                          <span>{item.text[locale]}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+              <p class="mono fold__more" aria-hidden="true">⋯</p>
+            </div>
+          </Panel>
+        ))
+      }
+      {
+        sideActive.map((entry, i) => (
+          <Panel grow={0} id={primary.length === 0 && i === 0 ? 'work' : undefined}>
+            <h2 class="h">{entry.title[locale]}</h2>
+            {entry.summary[locale] && <p class="body body--sm">{entry.summary[locale]}</p>}
+            <dl class="fields">
               <div class="fields__row">
                 <dt class="tag">{L.status}</dt>
                 <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
               </div>
-              {entry.source && (
-                <div class="fields__row">
-                  <dt class="tag">{L.source}</dt>
-                  <dd class="fields__val">
-                    <a href={entry.source.href} rel="noopener noreferrer" target="_blank">{entry.source.label}</a>
-                  </dd>
-                </div>
-              )}
             </dl>
-            {entry.progress && (
-              <div class="progress">
-                <p class="tag progress__head">
-                  {L.progress} · <span class="mono">{entry.progress.asOf}</span>
-                </p>
-                <ol class="progress__list">
-                  {entry.progress.items.map((item) => (
-                    <li class="progress__item" data-state={item.state}>
-                      <span class="mono progress__state">{L.state[item.state]}</span>
-                      <span>{item.text[locale]}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
           </Panel>
-        </div>
-      ))
-    }
+        ))
+      }
+    </div>
 
     {/* ---- 欄 4 起：其他進行中 + 已完成（白），每欄兩格，單數補空白格 ---- */}
     {
@@ -211,20 +229,20 @@ const photoAlt = en
                   <img class="dogrun__dog" src={dog.src} width={dog.width} height={dog.height} alt="" decoding="async" />
                 </div>
               </Panel>
-            ) : cell.kind === 'side' ? (
-              <Panel grow={cell.grow} id={primary.length === 0 && i === 0 ? 'work' : undefined}>
-                <h2 class="h">{cell.entry.title[locale]}</h2>
-                {cell.entry.summary[locale] && <p class="body body--sm">{cell.entry.summary[locale]}</p>}
-                <dl class="fields">
-                  <div class="fields__row">
-                    <dt class="tag">{L.status}</dt>
-                    <dd class="mono fields__val fields__val--mono">{t.statusLabel.active}</dd>
-                  </div>
-                </dl>
-              </Panel>
             ) : (
               <Panel closed grow={cell.grow}>
-                <h2 class="h">{cell.entry.title[locale]}</h2>
+                {/* 放不下的內容先淡出並顯示「⋯」，點這一格往下展開（同閱讀紀錄），見下方腳本的 fold */}
+                <div class="fold" data-more="false">
+                <h2 class="h fold__title">
+                  <button class="fold__toggle" type="button" aria-expanded="false" aria-controls={`fold-${cell.entry.id}`} disabled>
+                    <span>{cell.entry.title[locale]}</span>
+                    <span class="mono fold__hint" aria-hidden="true">
+                      <span class="fold__hint-open">{L.expand} ↓</span>
+                      <span class="fold__hint-close">{L.collapse} ↑</span>
+                    </span>
+                  </button>
+                </h2>
+                <div class="fold__body" id={`fold-${cell.entry.id}`}>
                 {cell.entry.summary[locale] && <p class="body body--sm">{cell.entry.summary[locale]}</p>}
                 {/* 不標「已完成」：灰底虛線框本身就說明了（使用者要求，寫出來代表設計失敗） */}
                 <dl class="fields">
@@ -243,6 +261,9 @@ const photoAlt = en
                     </div>
                   )}
                 </dl>
+                </div>
+                <p class="mono fold__more" aria-hidden="true">⋯</p>
+                </div>
               </Panel>
             )
           )}
@@ -1000,6 +1021,130 @@ const photoAlt = en
     color: var(--ink-muted);
   }
 
+  /* ---- 放不下就收起來，點了往下展開（跟閱讀紀錄一樣） ----
+     用在藍色的 COALA 與已完成的格子。收合時內容底部淡出、最下面一個「⋯」、標題右邊出現「展開全部 ↓」；
+     點這一格，它長高吃掉整欄，同欄其他格縮到 0 並淡出。內容放得下的格子不能點。滑鼠移上去只放大，不展開。 */
+  .col--primary > :global(.panel),
+  .col--work > :global(.panel),
+  .col--closed > :global(.panel) {
+    transition:
+      flex-grow calc(var(--clock) * 1.3) var(--ease),
+      opacity var(--clock) var(--ease),
+      transform var(--clock-hover) var(--ease-spring),
+      box-shadow var(--clock-hover) var(--ease),
+      border-color var(--clock-hover) var(--ease);
+  }
+
+  :global(.col[data-folding='true'] > .panel[data-open='true']) {
+    flex: 30 1 0px !important;
+  }
+
+  :global(.col[data-folding='true'] > .panel:not([data-open='true'])) {
+    flex: 0 0 0px !important;
+    min-height: 0 !important;
+    opacity: 0;
+    border-width: 0;
+    pointer-events: none;
+  }
+
+  .fold {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .fold__title {
+    flex: none;
+  }
+
+  .fold__toggle {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .fold__toggle:disabled {
+    cursor: default;
+  }
+
+  .fold__toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  :global(.panel[data-accent='true']) .fold__toggle:focus-visible {
+    outline-color: var(--on-accent);
+  }
+
+  .fold__hint {
+    display: none;
+    flex: none;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* 藍色格裡的提示用白色，藍底上才看得到 */
+  :global(.panel[data-accent='true']) .fold__hint {
+    color: var(--on-accent);
+  }
+
+  .fold[data-more='true'] .fold__hint,
+  :global(.panel[data-open='true']) .fold__hint {
+    display: inline;
+  }
+
+  .fold__hint-close,
+  :global(.panel[data-open='true']) .fold__hint-open {
+    display: none;
+  }
+
+  :global(.panel[data-open='true']) .fold__hint-close {
+    display: inline;
+  }
+
+  .fold__body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .fold[data-more='true'] .fold__body {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent);
+  }
+
+  :global(.panel[data-open='true']) .fold__body {
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .fold__more {
+    display: none;
+    flex: none;
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted);
+  }
+
+  :global(.panel[data-accent='true']) .fold__more {
+    color: color-mix(in oklab, var(--on-accent) 84%, transparent);
+  }
+
+  .fold[data-more='true'] .fold__more {
+    display: block;
+  }
+
   /* ---- 空白格裡的像素黃金獵犬 ----
      格子剛從右邊露出來時狗在最左邊，格子要從左邊離開時狗在最右邊（使用者指定，方向與捲動相反）。
      --dog-p 由腳本依格子在畫面上的位置設定，0 = 最左、1 = 最右。 */
@@ -1347,6 +1492,42 @@ const photoAlt = en
       });
       if (readingPanel) readingPanel.style.cursor = 'pointer';
     }
+
+    // 放不下的格子（COALA、已完成的）：點開往下展開、同欄其他格收起，再點一次或按 Esc 收合
+    document.querySelectorAll<HTMLElement>('.fold').forEach((fold) => {
+      const panel = fold.closest<HTMLElement>('.panel');
+      const col = panel?.parentElement;
+      const body = fold.querySelector<HTMLElement>('.fold__body');
+      const btn = fold.querySelector<HTMLButtonElement>('.fold__toggle');
+      if (!panel || !col || !body || !btn) return;
+      const check = () => {
+        const open = panel.dataset.open === 'true';
+        const more = !open && body.scrollHeight > body.clientHeight + 1;
+        fold.dataset.more = String(more);
+        btn.disabled = !(more || open);
+        panel.style.cursor = more || open ? 'pointer' : '';
+      };
+      const setOpen = (open: boolean) => {
+        panel.dataset.open = String(open);
+        col.dataset.folding = String(open);
+        btn.setAttribute('aria-expanded', String(open));
+        check();
+        window.setTimeout(check, 700); // 展開動畫結束後再量一次
+      };
+      check();
+      document.fonts?.ready.then(check);
+      new ResizeObserver(check).observe(panel);
+      panel.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a') || btn.disabled) return;
+        setOpen(panel.dataset.open !== 'true');
+      });
+      panel.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.dataset.open === 'true') {
+          setOpen(false);
+          btn.focus({ preventScroll: true });
+        }
+      });
+    });
 
     // 「往右看進行中的工作」平滑捲到主要計畫
     document.querySelectorAll<HTMLAnchorElement>('a[href="#work"]').forEach((a) => {
