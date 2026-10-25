@@ -1015,7 +1015,8 @@ const photoAlt = en
     --edge: 1.25rem;
     --dog-x: calc(-1 * var(--edge) - var(--dog-w) + (100cqw + 2 * var(--edge) + var(--dog-w)) * var(--dog-p, 0));
     position: absolute;
-    inset: 0 var(--edge) 1rem;
+    /* 底部是 0：狗與球站在地上時腳底切齊格子的底邊（使用者要求） */
+    inset: 0 var(--edge) 0;
     container-type: inline-size;
     pointer-events: none;
   }
@@ -1044,7 +1045,7 @@ const photoAlt = en
   /* 球的影子：球越高影子越窄 */
   .dogrun__shadow {
     position: absolute;
-    bottom: calc(var(--px) * -0.5);
+    bottom: 0;
     left: calc(var(--dog-x) + var(--dog-w) + (var(--ball-lead, 2) + 1) * var(--px));
     width: calc(6 * var(--px));
     height: var(--px);
